@@ -1,0 +1,10 @@
+PROJECT_NAME           = LuaCpp
+PROJECT_NUMBER         = 0.0.1
+PROJECT_BRIEF          = C++ wrapper for Lua library
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+UML_LOOK               = YES
+RECURSIVE              = YES
+OUTPUT_DIRECTORY       = @PROJECT_BINARY_DIR@/doc_doxygen/
+INPUT                  = @PROJECT_SOURCE_DIR@/../Source/ @PROJECT_SOURCE_DIR@/../docs
+EXAMPLE_PATH           = @PROJECT_SOURCE_DIR@/../Source/Example

@@ -28,11 +28,14 @@
 using namespace LuaCpp::Engine;
 
 LuaState::LuaState() {
+	shared = false;
 	L = luaL_newstate();
 }
 
 LuaState::~LuaState() {
-	lua_close(L);
+	if (!shared) {
+		lua_close(L);
+	}
 }
 
 LuaState::operator lua_State *() {

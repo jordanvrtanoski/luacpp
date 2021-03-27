@@ -46,6 +46,22 @@ static int foo (lua_State *L) {
   return 2;                   /* number of results */
 }
 
+static int foo_meta (lua_State *L) {
+  int n = lua_gettop(L);    /* number of arguments */
+  lua_Number sum = 0.0;
+  int i;
+  for (i = 2; i <= n; i++) {
+    if (!lua_isnumber(L, i)) {
+      lua_pushliteral(L, "incorrect argument");
+      lua_error(L);
+    }
+    sum += lua_tonumber(L, i);
+  }
+  lua_pushnumber(L, sum/n);        /* first result */
+  lua_pushnumber(L, sum);         /* second result */
+  return 2;                   /* number of results */
+}
+
 int main(int argc, char **argv) {
 
 	// Creage Lua context
@@ -69,5 +85,20 @@ int main(int argc, char **argv) {
   	{
 		std::cout << e.what() << '\n';
   	}
+
+	lua.CompileString("test", "print('Calling foo as a metafunction of a usertype ' .. foo(1,2,3,4))");
+	std::unique_ptr<LuaState> L = lua.newStateFor("test");
+
+	LuaTUserData ud(sizeof(LuaTUserData *));
+	
+	ud.AddMetaFunction("__call", foo_meta);
+	
+	ud.PushGlobal(*L, "foo");
+
+	int res = lua_pcall(*L, 0, LUA_MULTRET, 0);
+	if (res != LUA_OK ) {
+		std::cout << "Error Executing " << res << " " << lua_tostring(*L,1) << "\n";	
+	}
+
 
 }

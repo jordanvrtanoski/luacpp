@@ -22,46 +22,29 @@
    SOFTWARE.
    */
 
-#include <memory>
 
-#include "LuaRegistry.hpp"
-#include "LuaCompiler.hpp"
+#ifndef LUACPP_LUATNIL_HPP
+#define LUACPP_LUATNIL_HPP
 
+#include "../Lua.hpp"
+#include "LuaState.hpp"
+#include "LuaType.hpp"
 
-using namespace LuaCpp::Registry;
+namespace LuaCpp {
+	namespace Engine {
+		class LuaTNil : public LuaType {
+		   public:
+			LuaTNil() : LuaType() {}
+			~LuaTNil() {}
 
-bool inline LuaRegistry::Exists(std::string name) {
-	return !(registry.find( name ) == registry.end());
-}
+			int getTypeId();
+			std::string getTypeName(LuaState &L);
+			void PushValue(LuaState &L);
+			void PopValue(LuaState &L, int idx);
+			std::string ToString();
 
-void LuaRegistry::CompileAndAddString(std::string name, std::string code) {
-	CompileAndAddString(name, code, false);
-}
-
-void LuaRegistry::CompileAndAddString(std::string name, std::string code, bool recompile) {
-
-	if ( !Exists(name) or recompile ) { 
-		LuaCompiler cmp;
-		std::unique_ptr<LuaCodeSnippet> snp = cmp.CompileString(name, code);
-
-		registry[name] = std::move(*snp);
+		};
 	}
 }
+#endif // LUACPP_LUATNIL_HPP
 
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname) {
-	CompileAndAddFile(name, fname, false);
-}
-
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname, bool recompile) {
-
-	if ( !Exists(name) or recompile ) { 
-		LuaCompiler cmp;
-		std::unique_ptr<LuaCodeSnippet> snp = cmp.CompileFile(name, fname);
-
-		registry[name] = std::move(*snp);
-	}
-}
-
-std::unique_ptr<LuaCodeSnippet> LuaRegistry::getByName(std::string name) {
-	return std::make_unique<LuaCodeSnippet>(registry[name]);
-}

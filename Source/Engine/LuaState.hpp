@@ -47,6 +47,7 @@ namespace LuaCpp {
 		class LuaState {
 		private:
 			lua_State *L;
+			bool shared;
 		public:
 			/**
 			 * @brief Constructor that creates a new state
@@ -59,6 +60,28 @@ namespace LuaCpp {
 			 */
 			explicit LuaState();
 
+			/**
+			 * @brief Constructor that creates a new state
+			 *
+			 * @details
+			 * Creates new lua_State with the low level call to the 
+			 * Lua library. The state should not be closed by the 
+			 * user, since the class will autmaticaly close the state
+			 * one the instance is destroyed.
+			 */
+			explicit LuaState(lua_State *_L) : L(_L) {}
+		
+			/**
+			 * @brief Constructor that creates a new state
+			 *
+			 * @details
+			 * Creates new lua_State with the low level call to the 
+			 * Lua library. The state should not be closed by the 
+			 * user, since the class will autmaticaly close the state
+			 * one the instance is destroyed.
+			 */
+			explicit LuaState(lua_State *_L, bool _shared) : L(_L), shared(_shared)  {}
+			
 			/**
 			 * @brief Destructor
 			 *

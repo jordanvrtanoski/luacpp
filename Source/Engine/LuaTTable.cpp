@@ -36,7 +36,7 @@ using namespace LuaCpp::Engine::Table;
 namespace LuaCpp {
 	namespace Engine {
 		namespace Table {
-			bool operator <(const Key &rhs, const Key &lhs){
+			bool operator <(const Key &lhs, const Key &rhs){
 				if (lhs._isNumber and rhs._isNumber) {
 					return lhs.int_val < rhs.int_val;
 				}
@@ -49,7 +49,7 @@ namespace LuaCpp {
 				return false;
 			}
 
-			bool operator ==(const Key &rhs, const Key &lhs){
+			bool operator ==(const Key &lhs, const Key &rhs){
 				if (lhs._isNumber != rhs._isNumber) {
 					return false;
 				}

@@ -54,8 +54,16 @@ void LuaContext::CompileString(std::string name, std::string code) {
 	registry.CompileAndAddString(name, code);
 }
 
+void LuaContext::CompileString(std::string name, std::string code, bool recompile) {
+	registry.CompileAndAddString(name, code, recompile);
+}
+
 void LuaContext::CompileFile(std::string name, std::string fname) {
 	registry.CompileAndAddFile(name,fname);
+}
+
+void LuaContext::CompileFile(std::string name, std::string fname, bool recompile) {
+	registry.CompileAndAddFile(name,fname, recompile);
 }
 
 void LuaContext::CompileStringAndRun(std::string code) {

@@ -22,46 +22,28 @@
    SOFTWARE.
    */
 
-#include <memory>
+#include "LuaTNil.hpp"
 
-#include "LuaRegistry.hpp"
-#include "LuaCompiler.hpp"
+using namespace LuaCpp::Engine;
 
-
-using namespace LuaCpp::Registry;
-
-bool inline LuaRegistry::Exists(std::string name) {
-	return !(registry.find( name ) == registry.end());
+int LuaTNil::getTypeId() {
+	return LUA_TNIL;
 }
 
-void LuaRegistry::CompileAndAddString(std::string name, std::string code) {
-	CompileAndAddString(name, code, false);
+std::string LuaTNil::getTypeName(LuaState &L) {
+	return std::string(lua_typename(L, LUA_TNIL));
 }
 
-void LuaRegistry::CompileAndAddString(std::string name, std::string code, bool recompile) {
+void LuaTNil::PushValue(LuaState &L) {
+	lua_pushnil(L);
+}
 
-	if ( !Exists(name) or recompile ) { 
-		LuaCompiler cmp;
-		std::unique_ptr<LuaCodeSnippet> snp = cmp.CompileString(name, code);
-
-		registry[name] = std::move(*snp);
+void LuaTNil::PopValue(LuaState &L, int idx) {
+	if (!lua_type(L, idx) == LUA_TNIL) {
+		throw std::invalid_argument("The value at the stack position " + std::to_string(idx) + " is not LUA_TNUMBER");
 	}
 }
 
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname) {
-	CompileAndAddFile(name, fname, false);
-}
-
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname, bool recompile) {
-
-	if ( !Exists(name) or recompile ) { 
-		LuaCompiler cmp;
-		std::unique_ptr<LuaCodeSnippet> snp = cmp.CompileFile(name, fname);
-
-		registry[name] = std::move(*snp);
-	}
-}
-
-std::unique_ptr<LuaCodeSnippet> LuaRegistry::getByName(std::string name) {
-	return std::make_unique<LuaCodeSnippet>(registry[name]);
+std::string LuaTNil::ToString() {
+	return "nil";
 }

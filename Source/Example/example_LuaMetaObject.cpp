@@ -22,46 +22,47 @@
    SOFTWARE.
    */
 
-#include <memory>
+#include "../LuaCpp.hpp"
+#include <iostream>
+#include <stdexcept>
 
-#include "LuaRegistry.hpp"
-#include "LuaCompiler.hpp"
-
-
+using namespace LuaCpp;
 using namespace LuaCpp::Registry;
+using namespace LuaCpp::Engine;
 
-bool inline LuaRegistry::Exists(std::string name) {
-	return !(registry.find( name ) == registry.end());
-}
+int main(int argc, char **argv) {
 
-void LuaRegistry::CompileAndAddString(std::string name, std::string code) {
-	CompileAndAddString(name, code, false);
-}
+	// Creage Lua context
+	LuaContext lua;
 
-void LuaRegistry::CompileAndAddString(std::string name, std::string code, bool recompile) {
+	lua.CompileString("test1", "print('Calling foo as a metafunction of a usertype ' .. foo[1] .. foo[\"key\"])");
+	lua.CompileString("test2", "print('Assigning to foo ') foo[1] = 'test'");
+	lua.CompileString("test3", "print('Calling the foo ') foo(1,\"foo\")");
+	
+	std::unique_ptr<LuaState> L = lua.newStateFor("test1");
 
-	if ( !Exists(name) or recompile ) { 
-		LuaCompiler cmp;
-		std::unique_ptr<LuaCodeSnippet> snp = cmp.CompileString(name, code);
+	LuaMetaObject obj;
+	
+	obj.PushGlobal(*L, "foo");
 
-		registry[name] = std::move(*snp);
+	int res = lua_pcall(*L, 0, LUA_MULTRET, 0);
+	if (res != LUA_OK ) {
+		std::cout << "Error Executing " << res << " " << lua_tostring(*L,1) << "\n";	
 	}
-}
 
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname) {
-	CompileAndAddFile(name, fname, false);
-}
+	L = lua.newStateFor("test2");
+	obj.PushGlobal(*L, "foo");
 
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname, bool recompile) {
-
-	if ( !Exists(name) or recompile ) { 
-		LuaCompiler cmp;
-		std::unique_ptr<LuaCodeSnippet> snp = cmp.CompileFile(name, fname);
-
-		registry[name] = std::move(*snp);
+	res = lua_pcall(*L, 0, LUA_MULTRET, 0);
+	if (res != LUA_OK ) {
+		std::cout << "Error Executing " << res << " " << lua_tostring(*L,1) << "\n";	
 	}
-}
 
-std::unique_ptr<LuaCodeSnippet> LuaRegistry::getByName(std::string name) {
-	return std::make_unique<LuaCodeSnippet>(registry[name]);
+	L = lua.newStateFor("test3");
+	obj.PushGlobal(*L, "foo");
+
+	res = lua_pcall(*L, 0, LUA_MULTRET, 0);
+	if (res != LUA_OK ) {
+		std::cout << "Error Executing " << res << " " << lua_tostring(*L,1) << "\n";	
+	}
 }

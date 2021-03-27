@@ -102,6 +102,21 @@ namespace LuaCpp {
 		void CompileString(std::string name, std::string code);
 		
 		/**
+		 * @brief Compiles a string containing Lua code and adds it to the repository
+		 *
+		 * @details
+		 * Compiles a string containing Lua code and adds the compiled binary to the
+		 * repository as a LuaCodeSnippet. The code is registered in Lua engine and in 
+		 * the repository under the same name. If the compilation fails, the function
+		 * will throw an `std::logic_error` with the error code received from Lua engin
+		 *
+		 * @param name Name under which the snippet is registered in the repository
+		 * @param code A valid Lua code that will be compiled
+		 * @param recompile if true, the new version of the code will be active
+		 */
+		void CompileString(std::string name, std::string code, bool recompile);
+
+		/**
 		 * @brief Compiles a fle containing Lua code and adds it to the registry
 		 *
 		 * @details
@@ -114,6 +129,21 @@ namespace LuaCpp {
 		 * @param code path to the file where the code is stored
 		 */
 		void CompileFile(std::string name, std::string fname);
+
+		/**
+		 * @brief Compiles a fle containing Lua code and adds it to the registry
+		 *
+		 * @details
+		 * Compiles a file containing Lua code and adds the compiled binary to the
+		 * repository as a LuaCodeSnippet. The code is registered in Lua engine and in 
+		 * the repository under the same name. If the compilation fails, the function
+		 * will throw an `std::logic_error` with the error code received from Lua engin
+		 *
+		 * @param name Name under which the snippet is registered in the registry
+		 * @param code path to the file where the code is stored
+		 * @param recompile if set to true, the new code will replace the old in the registry
+		 */
+		void CompileFile(std::string name, std::string fname, bool recompile);
 
 		/**
 		 * @bried Compiles a code snippet and runs

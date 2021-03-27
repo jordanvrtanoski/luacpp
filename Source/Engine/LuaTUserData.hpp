@@ -22,46 +22,44 @@
    SOFTWARE.
    */
 
-#include <memory>
 
-#include "LuaRegistry.hpp"
-#include "LuaCompiler.hpp"
+#ifndef LUACPP_LUATUSERDATA_HPP
+#define LUACPP_LUATUSERDATA_HPP
 
+#include <map>
 
-using namespace LuaCpp::Registry;
+#include "../Lua.hpp"
+#include "LuaState.hpp"
+#include "LuaType.hpp"
 
-bool inline LuaRegistry::Exists(std::string name) {
-	return !(registry.find( name ) == registry.end());
-}
+namespace LuaCpp {
+	namespace Engine {
+		class LuaTUserData : public LuaType {
+		   protected:
+			void *userdata;
+			size_t size;
 
-void LuaRegistry::CompileAndAddString(std::string name, std::string code) {
-	CompileAndAddString(name, code, false);
-}
+			std::map<std::string, lua_CFunction> metatable;
 
-void LuaRegistry::CompileAndAddString(std::string name, std::string code, bool recompile) {
+			virtual void _storeData();
+			virtual void _retreiveData();
+		   public:
+			LuaTUserData(size_t _size) : size(_size), LuaType(), userdata(NULL), metatable() {}
+			~LuaTUserData() {}
 
-	if ( !Exists(name) or recompile ) { 
-		LuaCompiler cmp;
-		std::unique_ptr<LuaCodeSnippet> snp = cmp.CompileString(name, code);
+			int getTypeId();
+			std::string getTypeName(LuaState &L);
+			void PushValue(LuaState &L);
+			void PopValue(LuaState &L, int idx);
+			std::string ToString();
 
-		registry[name] = std::move(*snp);
+			void *getRawUserData();
+
+			void AddMetaFunction(std::string fname, lua_CFunction fn);
+
+		};
 	}
 }
+#endif // LUACPP_LUATUSERDATA_HPP
 
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname) {
-	CompileAndAddFile(name, fname, false);
-}
 
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname, bool recompile) {
-
-	if ( !Exists(name) or recompile ) { 
-		LuaCompiler cmp;
-		std::unique_ptr<LuaCodeSnippet> snp = cmp.CompileFile(name, fname);
-
-		registry[name] = std::move(*snp);
-	}
-}
-
-std::unique_ptr<LuaCodeSnippet> LuaRegistry::getByName(std::string name) {
-	return std::make_unique<LuaCodeSnippet>(registry[name]);
-}

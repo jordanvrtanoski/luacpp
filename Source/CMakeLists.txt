@@ -101,6 +101,11 @@ add_dependencies(testLuaTypes googletest)
 target_link_libraries(testLuaTypes luacpp_static gtest_main gtest pthread)
 gtest_discover_tests(testLuaTypes)
 
+add_executable(testLuaCompiler UnitTest/TestLuaCompiler.cpp)
+add_dependencies(testLuaCompiler googletest)
+target_link_libraries(testLuaCompiler luacpp_static gtest_main gtest pthread)
+gtest_discover_tests(testLuaCompiler)
+
 ##########
 # Coverage
 ##########

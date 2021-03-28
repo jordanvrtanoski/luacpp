@@ -107,7 +107,7 @@ gtest_discover_tests(testLuaTypes)
 
 if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
     if( NOT CMAKE_COMPILER_IS_GNUCXX AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
-        message(WARNING "<coverage.cmake> Coverage not yet implemented for your compiler '${CMAKE_CXX_COMPILER_ID}' (only GNU and Clang)")
+        message(WARNING "Coverage not yet implemented for your compiler '${CMAKE_CXX_COMPILER_ID}' (only GNU and Clang)")
         return()
     endif()
 
@@ -135,6 +135,20 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
 			     --exclude-throw-branches
             COMMAND echo "To display coverage report: firefox ${CMAKE_BINARY_DIR}/gcovr.html"
          ) 
+	add_custom_target (coverage-json
+	    COMMAND make test
+            COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}
+                             --exclude          ${CMAKE_SOURCE_DIR}/3rdparty
+			     --exclude          ${CMAKE_SOURCE_DIR}/Example
+                             --exclude          ${CMAKE_BINARY_DIR}
+                             --object-directory ${CMAKE_BINARY_DIR}
+                             --sort-uncovered
+                             --print-summary
+                             --exclude-unreachable-branches
+			     --exclude-throw-branches
+			     --json 
+			     --output coverallis.json
+	)
 	add_custom_target (coverage-cli
 	    COMMAND make test
             COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}

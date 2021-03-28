@@ -1,7 +1,9 @@
-[![<ORG_NAME>](https://circleci.com/gh/jordanvrtanoski/luacpp.svg?style=svg)](https://circleci.com/gh/jordanvrtanoski/luacpp)
 # luacpp
 Lua CPP wrapper
 
+## Build Status
+[![<ORG_NAME>](https://circleci.com/gh/jordanvrtanoski/luacpp/tree/main.svg?style=shield)](https://circleci.com/gh/jordanvrtanoski/luacpp)
+[![Coverage Status](https://coveralls.io/repos/github/jordanvrtanoski/luacpp/badge.svg?branch=main)](https://coveralls.io/github/jordanvrtanoski/luacpp?branch=main)
 
 ## Installing
 

@@ -18,6 +18,7 @@ jobs:
       - run: DEBIAN_FRONTEND=noninteractive apt install -y build-essential liblua5.3-dev lua5.3 git cmake valgrind texlive-latex-base texlive-latex-recommended texlive-latex-extra graphviz gcovr
       - run: rm -rf luacpp
       - checkout
+      - run: pwd && ls -ltr
       - run: mkdir luacpp/build
       - run: cd luacpp/build && cmake -DCMAKE_BUILD_TYPE=Coverage ../Source && make -j4
       - run: cd luacpp/build && make coverage-cli

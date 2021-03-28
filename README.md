@@ -1,6 +1,8 @@
-[![<ORG_NAME>](https://circleci.com/gh/jordanvrtanoski/luacpp.svg?style=svg)](https://circleci.com/gh/jordanvrtanoski/luacpp)
 # luacpp
 Lua CPP wrapper
+
+## Build Status
+[![<ORG_NAME>](https://circleci.com/gh/jordanvrtanoski/luacpp/tree/circleci-project-setup.svg?style=shield)](https://circleci.com/gh/jordanvrtanoski/luacpp)
 
 
 ## Installing

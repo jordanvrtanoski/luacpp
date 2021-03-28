@@ -1,3 +1,4 @@
+[![<ORG_NAME>](https://circleci.com/gh/jordanvrtanoski/luacpp.svg?style=svg)](https://circleci.com/gh/jordanvrtanoski/luacpp)
 # luacpp
 Lua CPP wrapper
 

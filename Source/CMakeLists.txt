@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.9)
 project(luacpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# Source files
 set(SOURCE_FILES
 	Lua.hpp
 	LuaCpp.cpp LuaCpp.hpp
@@ -25,7 +26,6 @@ set(SOURCE_FILES
 
 include(GNUInstallDirs)
 
-
 find_package(Lua REQUIRED)
 
 include_directories(example_HelloLua PRIVATE ${LUA_INCLUDE_DIR})
@@ -36,6 +36,10 @@ set_target_properties(luacpp_static PROPERTIES OUTPUT_NAME luacpp)
 target_link_libraries(luacpp ${LUA_LIBRARIES})
 target_link_libraries(luacpp_static ${LUA_LIBRARIES})
 
+
+##########
+# Examples
+##########
 add_executable(hello Example/example_helloworld.cpp)
 target_link_libraries(hello luacpp_static)
 
@@ -50,6 +54,9 @@ add_custom_command(TARGET hello POST_BUILD
 	COMMENT "${PROJECT_BINARY_DIR}/hello.lua copied to build" 
 )
 
+#########
+# Install
+#########
 install(TARGETS luacpp
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
@@ -64,7 +71,91 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/Registry ${CMAKE_SOURC
 )
 
 
+#########
+# Testing
+#########
+enable_testing()
+# Install Google test library
+set(GOOGLETEST_INSTALL "${CMAKE_CURRENT_BINARY_DIR}/googletest-install")
+set(GOOGLETEST_INCLUDE "${GOOGLETEST_INSTALL}/include")
+include(ExternalProject)
+ExternalProject_Add(googletest
+  GIT_REPOSITORY    https://github.com/google/googletest.git
+  GIT_TAG           master
+  SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-src"
+  BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
+  CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${GOOGLETEST_INSTALL} -DINCLUDE_INSTALL_DIR=${GOOGLETEST_INSTALL}
+  TEST_COMMAND      ""
+)
+link_directories(${GOOGLETEST_INSTALL}/lib)
+include_directories(${GOOGLETEST_INSTALL}/include)
+include(GoogleTest)
+
+add_executable(testLuaContext UnitTest/TestLuaContext.cpp)
+add_dependencies(testLuaContext googletest)
+target_link_libraries(testLuaContext luacpp_static gtest_main gtest pthread)
+gtest_discover_tests(testLuaContext)
+
+add_executable(testLuaTypes UnitTest/TestLuaTypes.cpp)
+add_dependencies(testLuaTypes googletest)
+target_link_libraries(testLuaTypes luacpp_static gtest_main gtest pthread)
+gtest_discover_tests(testLuaTypes)
+
+##########
+# Coverage
+##########
+
+if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
+    if( NOT CMAKE_COMPILER_IS_GNUCXX AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
+        message(WARNING "<coverage.cmake> Coverage not yet implemented for your compiler '${CMAKE_CXX_COMPILER_ID}' (only GNU and Clang)")
+        return()
+    endif()
+
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
+
+    find_program (gcovr gcovr)
+
+    if (gcovr)
+	message (STATUS "Found command 'gcovr' => Use target 'coverage-html' or 'coverage-cli' to generate coverage report '${CMAKE_BINARY_DIR}/gcovr.html'")
+	add_custom_target (coverage-html
+	    COMMAND make test
+            COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}
+                             --exclude          ${CMAKE_SOURCE_DIR}/3rdparty
+			     --exclude          ${CMAKE_SOURCE_DIR}/Example
+                             --exclude          ${CMAKE_BINARY_DIR}
+                             --object-directory ${CMAKE_BINARY_DIR}
+                             --output           ${CMAKE_BINARY_DIR}/gcovr.html
+                             --html
+                             --html-details
+                             --sort-uncovered
+                             --print-summary
+                             --exclude-unreachable-branches
+			     --exclude-throw-branches
+            COMMAND echo "To display coverage report: firefox ${CMAKE_BINARY_DIR}/gcovr.html"
+         ) 
+	add_custom_target (coverage-cli
+	    COMMAND make test
+            COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}
+                             --exclude          ${CMAKE_SOURCE_DIR}/3rdparty
+			     --exclude          ${CMAKE_SOURCE_DIR}/Example
+                             --exclude          ${CMAKE_BINARY_DIR}
+                             --object-directory ${CMAKE_BINARY_DIR}
+                             --sort-uncovered
+                             --print-summary
+                             --exclude-unreachable-branches
+			     --exclude-throw-branches
+         ) 
+    else()
+         message(FATAL_ERROR "Cannot find command 'gcovr' => Please install package 'gcovr' to generate code coverage report (HTML)")
+    endif()
+
+endif()
+
+###########
 # Documents
+###########
 option(BUILD_DOC "Build documentation" OFF)
 
 # check if Doxygen is installed

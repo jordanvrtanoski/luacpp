@@ -73,7 +73,7 @@ namespace LuaCpp {
 			 * Default constructor used to construct the library
 			 * with a given name
 			 */
-			LuaLibrary(std::string _name) : name(std::move(_name)) {}
+			explicit LuaLibrary(const std::string &_name) : name(std::move(_name)) {}
 
 			/**
 			 * @bried default destrucor
@@ -102,7 +102,7 @@ namespace LuaCpp {
 			 *
 			 * @param name the library name
 			 */
-			void setName(std::string name);
+			void setName(const std::string &name);
 
 			/**
 			 * @brief Check if the function exists in the library
@@ -112,7 +112,7 @@ namespace LuaCpp {
 			 *
 			 * @return true if the function name is already in the library, otherwise false
 			 */
-			bool Exists(std::string name);
+			bool Exists(const std::string &name);
 
 			/**
 			 * @brief Add function to the library
@@ -126,7 +126,7 @@ namespace LuaCpp {
 			 * @param cfunction the function implementing lua_CFunction interface
 			 *
 			 */
-			void AddCFunction(std::string name, lua_CFunction cfunction);
+			void AddCFunction(const std::string &name, lua_CFunction cfunction);
 			
 			/**
 			 * @brief Add function to the library
@@ -140,7 +140,7 @@ namespace LuaCpp {
 			 * @param cfunction the function implementing lua_CFunction interface
 			 * @param replace replaces the function if already exits
 			 */
-			void AddCFunction(std::string name, lua_CFunction cfunction, bool replace);
+			void AddCFunction(const std::string &name, lua_CFunction cfunction, bool replace);
 
 			/**
 			 * @brief Register the library in the created state

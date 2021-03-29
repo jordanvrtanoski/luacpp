@@ -42,9 +42,9 @@ namespace LuaCpp {
 				std::string str_val;
 				int int_val;
 			  public:
-				Key(int value) : _isNumber(true), int_val(value) {}
-				Key(std::string value) : _isNumber(false), str_val(std::move(value)) {}
-				Key(const char *value) : _isNumber(false), str_val(std::string(value)) {}
+				explicit Key(int value) : _isNumber(true), int_val(value), str_val() {}
+				explicit Key(std::string value) : _isNumber(false), str_val(std::move(value)), int_val(0) {}
+				explicit Key(const char *value) : _isNumber(false), str_val(std::string(value)), int_val(0) {}
 				
 				bool isNumber();
 

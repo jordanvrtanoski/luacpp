@@ -44,7 +44,7 @@ namespace LuaCpp {
 			virtual void _storeData();
 			virtual void _retreiveData();
 		   public:
-			LuaTUserData(size_t _size) : size(_size), LuaType(), userdata(NULL), metatable() {}
+			explicit LuaTUserData(size_t _size) : size(_size), LuaType(), userdata(NULL), metatable() {}
 			~LuaTUserData() {}
 
 			int getTypeId();

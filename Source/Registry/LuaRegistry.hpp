@@ -72,7 +72,7 @@ namespace LuaCpp {
 			 * @param name Name under which the code will be registered
 			 * @param code Lua code
 			 */
-			void CompileAndAddString(std::string name, std::string code);
+			void CompileAndAddString(const std::string &name, const std::string &code);
 
 			/**
 			 * @brief Compiles a string and adds it to the registry
@@ -90,7 +90,7 @@ namespace LuaCpp {
 			 * @param code Lua code
 			 * @param recompile if set to `true` the code will be recompiled, if already exists.
 			 */
-			void CompileAndAddString(std::string name, std::string code, bool recompile);
+			void CompileAndAddString(const std::string &name, const std::string &code, bool recompile);
 			
 			/**
 			 * @brief Compiles a file and adds it to the registry
@@ -108,7 +108,7 @@ namespace LuaCpp {
 			 * @param name Name under which the code will be registered
 			 * @param fname Name of the file
 			 */
-			void CompileAndAddFile(std::string name, std::string fname);
+			void CompileAndAddFile(const std::string &name, const std::string &fname);
 			
 			/**
 			 * @brief Compiles a file and adds it to the registry
@@ -126,7 +126,7 @@ namespace LuaCpp {
 			 * @param code Lua code
 			 * @param recompile if set to `true` the code will be recompiled, if already exists.
 			 */
-			void CompileAndAddFile(std::string name, std::string fname, bool recompile);
+			void CompileAndAddFile(const std::string &name, const std::string &fname, bool recompile);
 
 			/**
 			 * @brief Checks if the snippet exists in the registry
@@ -138,7 +138,7 @@ namespace LuaCpp {
 			 *
 			 * @return `true` if the name exists in the registry
 			 */
-			bool Exists(std::string name);
+			bool Exists(const std::string &name);
 
 			/**
 			 * @brief Returns the code snipet associated with the name
@@ -150,7 +150,7 @@ namespace LuaCpp {
 			 *
 			 * @return unique_ptr to the LuaCodeSnippet associatd with the name
 			 */
-			std::unique_ptr<LuaCodeSnippet> getByName(std::string name);
+			std::unique_ptr<LuaCodeSnippet> getByName(const std::string &name);
 		};
 	}
 }

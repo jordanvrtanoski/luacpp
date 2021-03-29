@@ -40,7 +40,7 @@ std::unique_ptr<LuaState> LuaContext::newState() {
 	return L;
 }
 
-std::unique_ptr<LuaState> LuaContext::newStateFor(std::string name) {
+std::unique_ptr<LuaState> LuaContext::newStateFor(const std::string &name) {
 	if (registry.Exists(name)) {
 		std::unique_ptr<LuaCodeSnippet> cs = registry.getByName(name);
 		std::unique_ptr<LuaState> L = newState();
@@ -50,33 +50,33 @@ std::unique_ptr<LuaState> LuaContext::newStateFor(std::string name) {
 	throw std::runtime_error("Error: The code snipped not found ...");
 }
 
-void LuaContext::CompileString(std::string name, std::string code) {
+void LuaContext::CompileString(const std::string &name, const std::string &code) {
 	registry.CompileAndAddString(name, code);
 }
 
-void LuaContext::CompileString(std::string name, std::string code, bool recompile) {
+void LuaContext::CompileString(const std::string &name, const std::string &code, bool recompile) {
 	registry.CompileAndAddString(name, code, recompile);
 }
 
-void LuaContext::CompileFile(std::string name, std::string fname) {
+void LuaContext::CompileFile(const std::string &name, const std::string &fname) {
 	registry.CompileAndAddFile(name,fname);
 }
 
-void LuaContext::CompileFile(std::string name, std::string fname, bool recompile) {
+void LuaContext::CompileFile(const std::string &name, const std::string &fname, bool recompile) {
 	registry.CompileAndAddFile(name,fname, recompile);
 }
 
-void LuaContext::CompileStringAndRun(std::string code) {
+void LuaContext::CompileStringAndRun(const std::string &code) {
 	registry.CompileAndAddString("default", code, true);
 	Run("default");
 }
 
-void LuaContext::CompileFileAndRun(std::string code) {
+void LuaContext::CompileFileAndRun(const std::string &code) {
 	registry.CompileAndAddFile("default", code, true);
 	Run("default");
 }
 
-void LuaContext::Run(std::string name) {
+void LuaContext::Run(const std::string &name) {
 	std::unique_ptr<LuaState> L = newStateFor(name);
 	
 	int res = lua_pcall(*L, 0, LUA_MULTRET, 0);

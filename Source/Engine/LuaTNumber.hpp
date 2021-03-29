@@ -36,7 +36,7 @@ namespace LuaCpp {
 	           private:
 			lua_Number value;
 		   public:
-			LuaTNumber(double _value) : LuaType(), value(std::move(_value)) {}
+			explicit LuaTNumber(double _value) : LuaType(), value(std::move(_value)) {}
 			~LuaTNumber() {}
 
 			int getTypeId();

@@ -36,7 +36,7 @@ namespace LuaCpp {
 	           private:
 			bool value;
 		   public:
-			LuaTBoolean(bool _value) : LuaType(), value(std::move(_value)) {}
+			explicit LuaTBoolean(bool _value) : LuaType(), value(std::move(_value)) {}
 			~LuaTBoolean() {}
 
 			int getTypeId();

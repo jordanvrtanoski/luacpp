@@ -49,7 +49,6 @@ void LuaMetaObject::_retreiveData() {
 }
 
 int LuaMetaObject::getValue(LuaState &L) {
-	void * ud = lua_touserdata(L, 1);
 	if (lua_type(L, 2) == LUA_TSTRING) {
 		std::cout << "Calling getValue() with "<< lua_tostring(L, 2) << "\n";
 	} else {

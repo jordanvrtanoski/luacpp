@@ -38,7 +38,7 @@ namespace LuaCpp {
 		   private:
 			std::string value;
 		   public:
-			LuaTString(std::string _value) : LuaType(), value(std::move(_value)) {}
+			explicit LuaTString(std::string _value) : LuaType(), value(std::move(_value)) {}
 			~LuaTString() {}
 
 			int getTypeId();

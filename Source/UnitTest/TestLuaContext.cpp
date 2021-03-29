@@ -299,12 +299,12 @@ namespace LuaCpp {
 		 */
 		LuaContext ctx;
 
-		std::unique_ptr<Registry::LuaLibrary> lib = std::make_unique<Registry::LuaLibrary>("foolib");
+		std::shared_ptr<Registry::LuaLibrary> lib = std::make_shared<Registry::LuaLibrary>("foolib");
 		lib->AddCFunction("foo", foo);
 
 		testing::internal::CaptureStdout();
 
-		EXPECT_NO_THROW(ctx.AddLibrary(std::move(lib)));
+		EXPECT_NO_THROW(ctx.AddLibrary(lib));
 		EXPECT_NO_THROW(ctx.CompileString("test", "print(\"Result of calling foolib.foo(1,2,3,4) = \" .. foolib.foo(1,2,3,4))"));
 		
 		EXPECT_NO_THROW(ctx.Run("test"));
@@ -322,13 +322,13 @@ namespace LuaCpp {
 		 */
 		LuaContext ctx;
 
-		std::unique_ptr<Registry::LuaLibrary> lib = std::make_unique<Registry::LuaLibrary>("some_foolib");
+		std::shared_ptr<Registry::LuaLibrary> lib = std::make_shared<Registry::LuaLibrary>("some_foolib");
 		lib->AddCFunction("foo", foo);
 		lib->setName("foolib");
 
 		testing::internal::CaptureStdout();
 
-		EXPECT_NO_THROW(ctx.AddLibrary(std::move(lib)));
+		EXPECT_NO_THROW(ctx.AddLibrary(lib));
 		EXPECT_NO_THROW(ctx.CompileString("test", "print(\"Result of calling foolib.foo(1,2,3,4) = \" .. foolib.foo(1,2,3,4))"));
 		
 		EXPECT_NO_THROW(ctx.Run("test"));
@@ -336,6 +336,28 @@ namespace LuaCpp {
 		std::string output = testing::internal::GetCapturedStdout();
 	
 		EXPECT_EQ("Result of calling foolib.foo(1,2,3,4) = 2.5\n", output);
+
+	}
+
+	TEST_F(TestLuaContext, TestGlobalVariables) {
+		LuaContext ctx;
+
+		std::shared_ptr<Engine::LuaTString> str = std::make_shared<Engine::LuaTString>("testing 1,2,3");
+		testing::internal::CaptureStdout();
+
+		EXPECT_NO_THROW(ctx.AddGlobalVariable("test_str", str));
+		EXPECT_NO_THROW(ctx.CompileString("test", "print(test_str) test_str = 'changed'"));
+		
+		EXPECT_NO_THROW(ctx.Run("test"));
+		
+		std::string output = testing::internal::GetCapturedStdout();
+	
+		EXPECT_EQ("testing 1,2,3\n", output);
+		EXPECT_EQ("changed", str->getValue());
+		EXPECT_NE((void *) NULL, (void *) &ctx.getGlobalVariable("test_str"));
+		std::shared_ptr<Engine::LuaTString> str2 = std::static_pointer_cast<Engine::LuaTString>(ctx.getGlobalVariable("test_str"));
+		EXPECT_EQ("changed", str2->getValue());
+
 
 	}
 

@@ -96,11 +96,11 @@ namespace LuaCpp {
 		EXPECT_EQ(1, lua_gettop(*L));
 
 
-		std::unique_ptr<LuaLibrary> lib = std::make_unique<LuaLibrary>("foolib");
+		std::shared_ptr<LuaLibrary> lib = std::make_shared<LuaLibrary>("foolib");
 		lib->AddCFunction("foo", foo);
 
 		// Add library to the context
-		EXPECT_NO_THROW(ctx.AddLibrary(std::move(lib)));
+		EXPECT_NO_THROW(ctx.AddLibrary(lib));
 
 		// Compile a code using the new foolib.foo function
 		EXPECT_NO_THROW(ctx.CompileString("foo_test", "print(\"Result of calling foolib.foo(1,2,3,4) = \" .. foolib.foo(1,2,3,4))"));

@@ -30,6 +30,7 @@
 #include "Registry/LuaRegistry.hpp"
 #include "Registry/LuaLibrary.hpp"
 #include "Engine/LuaState.hpp"
+#include "Engine/LuaType.hpp"
 
 namespace LuaCpp {
 	/**
@@ -53,9 +54,29 @@ namespace LuaCpp {
 		 */
 		Registry::LuaRegistry registry;
 
+		/**
+		 * Custom `C` librraries for the session
+		 */
+		std::map<std::string, std::shared_ptr<Registry::LuaLibrary>> libraries;
 
-		std::map<std::string, Registry::LuaLibrary> libraries;
+		/**
+		 *
+		 */
+		std::map<std::string, std::shared_ptr<Engine::LuaType>> globalVariables;
+
 	public:
+
+		/**
+		 * @brief Constructs and empty context
+		 *
+		 * @details
+		 * Creates empty Lua cotext. This is the main entry point
+		 * for the communication with the Lua virtual machine
+		 * from the high level APIs.
+		 */
+		LuaContext() : registry(), libraries(), globalVariables() {};
+		~LuaContext() {};
+
 		/**
 		 * @brief Creates new Lua execution state from the context
 		 *
@@ -198,10 +219,25 @@ namespace LuaCpp {
 		*
 		* @param library The library containing `C` functions
 		*/
-		void AddLibrary(std::unique_ptr<Registry::LuaLibrary> library);
+		void AddLibrary(std::shared_ptr<Registry::LuaLibrary> &library);
 
-		LuaContext() : libraries() {};
-		~LuaContext() {};
+		/**
+		 * @brief Add a global variable
+		 *
+		 * @details
+		 * Add global variable. The variables will be populated in
+		 * the LuaState before the state is returned from the 
+		 * newState() and newStateFor() methods.
+		 *
+		 * The variables will be accessible from the lua enging
+		 * under the registered name.
+		 *
+		 * @param name name of the global variable
+		 * @param var the variable
+		 */
+		void AddGlobalVariable(const std::string &name, std::shared_ptr<Engine::LuaType> var);
+
+		std::shared_ptr<Engine::LuaType> &getGlobalVariable(const std::string &name);
 	};
 }
 

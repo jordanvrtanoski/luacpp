@@ -35,7 +35,10 @@ std::unique_ptr<LuaState> LuaContext::newState() {
 	std::unique_ptr<LuaState> L = std::make_unique<LuaState>();
 	luaL_openlibs(*L);
 	for(const auto &lib : libraries ) {
-		((LuaLibrary) lib.second).RegisterFunctions(*L);
+		((std::shared_ptr<LuaLibrary>) lib.second)->RegisterFunctions(*L);
+	}
+	for(const auto &var : globalVariables) {
+		((std::shared_ptr<LuaType>) var.second)->PushGlobal(*L, var.first);
 	}
 	return L;
 }
@@ -85,9 +88,21 @@ void LuaContext::Run(const std::string &name) {
 		throw std::runtime_error(lua_tostring(*L,1));
 	}
 
+	for(const auto &var : globalVariables) {
+		((std::shared_ptr<LuaType>) var.second)->PopGlobal(*L);
+	}
+
 }
 		
-
-void LuaContext::AddLibrary(std::unique_ptr<Registry::LuaLibrary> library) {
-	libraries.insert(std::make_pair<std::string, LuaLibrary>(library->getName(), std::move(*library)));
+void LuaContext::AddLibrary(std::shared_ptr<Registry::LuaLibrary> &library) {
+	libraries[library->getName()] = std::move(library);
 }
+
+void LuaContext::AddGlobalVariable(const std::string &name, std::shared_ptr<Engine::LuaType> var) {
+	globalVariables[name] = std::move(var);
+}
+
+std::shared_ptr<Engine::LuaType> &LuaContext::getGlobalVariable(const std::string &name) {
+	return globalVariables[name];
+}
+

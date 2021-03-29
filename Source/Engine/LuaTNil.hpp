@@ -44,9 +44,7 @@ namespace LuaCpp {
 			using LuaType::PopValue;
 			void PopValue(LuaState &L, int idx);
 			std::string ToString();
-
 		};
 	}
 }
 #endif // LUACPP_LUATNIL_HPP
-

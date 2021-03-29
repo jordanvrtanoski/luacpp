@@ -36,6 +36,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+      
+    - name: Install Lua Libraries
+      run: apt install -y liblua5.3-dev lua5.3 git cmake valgrind lcov gcovr 
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

@@ -4,6 +4,7 @@ Lua CPP wrapper
 ## Build Status
 [![<ORG_NAME>](https://circleci.com/gh/jordanvrtanoski/luacpp/tree/main.svg?style=shield)](https://circleci.com/gh/jordanvrtanoski/luacpp)
 [![Coverage Status](https://coveralls.io/repos/github/jordanvrtanoski/luacpp/badge.svg?branch=main)](https://coveralls.io/github/jordanvrtanoski/luacpp?branch=main)
+[![CodeQL](https://github.com/jordanvrtanoski/luacpp/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/jordanvrtanoski/luacpp/actions/workflows/codeql-analysis.yml)
 
 ## Installing
 

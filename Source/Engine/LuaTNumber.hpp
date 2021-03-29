@@ -36,12 +36,14 @@ namespace LuaCpp {
 	           private:
 			lua_Number value;
 		   public:
-			LuaTNumber(double _value) : LuaType(), value(std::move(_value)) {}
+			explicit LuaTNumber(double _value) : LuaType(), value(std::move(_value)) {}
 			~LuaTNumber() {}
 
 			int getTypeId();
 			std::string getTypeName(LuaState &L);
 			void PushValue(LuaState &L);
+
+			using LuaType::PopValue;
 			void PopValue(LuaState &L, int idx);
 			std::string ToString();
 

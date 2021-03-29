@@ -30,15 +30,15 @@
 
 using namespace LuaCpp::Registry;
 
-bool inline LuaRegistry::Exists(std::string name) {
+bool inline LuaRegistry::Exists(const std::string &name) {
 	return !(registry.find( name ) == registry.end());
 }
 
-void LuaRegistry::CompileAndAddString(std::string name, std::string code) {
+void LuaRegistry::CompileAndAddString(const std::string &name, const std::string &code) {
 	CompileAndAddString(name, code, false);
 }
 
-void LuaRegistry::CompileAndAddString(std::string name, std::string code, bool recompile) {
+void LuaRegistry::CompileAndAddString(const std::string &name, const std::string &code, bool recompile) {
 
 	if ( !Exists(name) or recompile ) { 
 		LuaCompiler cmp;
@@ -48,11 +48,11 @@ void LuaRegistry::CompileAndAddString(std::string name, std::string code, bool r
 	}
 }
 
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname) {
+void LuaRegistry::CompileAndAddFile(const std::string &name, const std::string &fname) {
 	CompileAndAddFile(name, fname, false);
 }
 
-void LuaRegistry::CompileAndAddFile(std::string name, std::string fname, bool recompile) {
+void LuaRegistry::CompileAndAddFile(const std::string &name, const std::string &fname, bool recompile) {
 
 	if ( !Exists(name) or recompile ) { 
 		LuaCompiler cmp;
@@ -62,6 +62,6 @@ void LuaRegistry::CompileAndAddFile(std::string name, std::string fname, bool re
 	}
 }
 
-std::unique_ptr<LuaCodeSnippet> LuaRegistry::getByName(std::string name) {
+std::unique_ptr<LuaCodeSnippet> LuaRegistry::getByName(const std::string &name) {
 	return std::make_unique<LuaCodeSnippet>(registry[name]);
 }

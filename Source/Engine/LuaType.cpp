@@ -26,7 +26,7 @@
 
 using namespace LuaCpp::Engine;
 
-LuaType::LuaType() {
+LuaType::LuaType() : globalName() {
 	global = false;
 }
 
@@ -51,4 +51,18 @@ void LuaType::PopGlobal(LuaState &L) {
 		PopValue(L);
 		lua_pop(L,1);
 	}
+}
+
+void LuaType::PopGlobal(LuaState &L, std::string _global_name) {
+	global = true;
+	globalName = std::move(_global_name);
+	PopGlobal(L);
+}
+
+bool LuaType::isGlobal() {
+	return global;
+}
+
+std::string LuaType::getGlobalName() {
+	return globalName;
 }

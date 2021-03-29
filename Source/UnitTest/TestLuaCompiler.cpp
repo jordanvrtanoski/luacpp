@@ -30,7 +30,7 @@
 
 extern "C" {
 	// Used for testing of the C library bridge
-     static int foo (lua_State *L) {
+   static int foo (lua_State *L) {
        int n = lua_gettop(L);    /* number of arguments */
        lua_Number sum = 0.0;
        int i;
@@ -46,11 +46,14 @@ extern "C" {
        lua_pushnumber(L, sum/n);        /* first result */
        lua_pushnumber(L, sum);         /* second result */
        return 2;                   /* number of results */
-     }
+   }
 }
 
 using namespace LuaCpp::Engine;
 using namespace LuaCpp::Registry;
+
+// Fixture for the test of the internal library function
+int _checkErrorAndThrow(LuaState &L, int error);
 
 namespace LuaCpp {
 
@@ -64,6 +67,20 @@ namespace LuaCpp {
 			*/
 		}
 	};
+
+	TEST_F(TestLuaCompiler, TestErrorThrow) {
+		LuaContext ctx;
+		std::unique_ptr<Engine::LuaState> L = ctx.newState();
+
+		EXPECT_NO_THROW(_checkErrorAndThrow(*L, LUA_OK));
+		EXPECT_THROW(_checkErrorAndThrow(*L, LUA_ERRMEM), std::runtime_error);
+		lua_pushstring(*L, "some error");
+		EXPECT_THROW(_checkErrorAndThrow(*L, LUA_ERRGCMM), std::out_of_range);
+		EXPECT_THROW(_checkErrorAndThrow(*L, LUA_ERRSYNTAX), std::logic_error);
+
+		EXPECT_THROW(_checkErrorAndThrow(*L, 9999), std::runtime_error);
+
+	}
 
 	TEST_F(TestLuaCompiler, TestLibrary) {
 		/**
@@ -98,6 +115,24 @@ namespace LuaCpp {
 		EXPECT_EQ("test", cf.getName());
 		
 		EXPECT_NO_THROW(cf.setCFunction(foo));
+	}
+
+	TEST_F(TestLuaCompiler, TestCodeSnippet) {
+
+		LuaCodeSnippet sp;
+
+		EXPECT_NO_THROW(sp.setName("test"));
+		EXPECT_EQ("test", sp.getName());
+
+		EXPECT_NO_THROW(
+		       EXPECT_EQ(0, sp.WriteCode((unsigned char *)"1234", 4))
+		);
+		EXPECT_NO_THROW(
+		       EXPECT_EQ(1, sp.WriteCode((unsigned char *)"1234", -1))
+		);
+
+		EXPECT_EQ(4, sp.getSize());
+
 	}
 
 }

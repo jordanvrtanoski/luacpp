@@ -612,5 +612,42 @@ namespace LuaCpp {
 		
 	}
 
+	TEST_F(TestLuaTypes, TestLuaTypeBaseClass) {
+		/**
+		 * Basic test getting instance of the `lua_State *`
+		 */
+		LuaContext ctx;
+
+		std::unique_ptr<LuaState> L = ctx.newState();
+		
+		LuaTString str("test_string");
+		LuaTString str2("");
+
+		// Assure the types are set correctly
+		EXPECT_EQ(LUA_TSTRING, str.getTypeId());
+		EXPECT_EQ("string", str.getTypeName(*L));
+
+		// Push and Pop global
+		EXPECT_NO_THROW(str.PushGlobal(*L, "test"));
+		EXPECT_NO_THROW(str.PopGlobal(*L));
+
+		EXPECT_EQ("test_string", str.getValue());
+		EXPECT_EQ("test", str.getGlobalName());
+		EXPECT_EQ(true, str.isGlobal());
+
+		// Pop global in new value
+		EXPECT_EQ(false, str2.isGlobal());
+		EXPECT_NO_THROW(str2.PopGlobal(*L, "test"));
+
+		EXPECT_EQ("test_string", str2.getValue());
+		EXPECT_EQ("test", str2.getGlobalName());
+		EXPECT_EQ(true, str2.isGlobal());
+
+		EXPECT_NO_THROW(str.PushValue(*L));
+		EXPECT_NO_THROW(str.PopValue(*L));
+		EXPECT_EQ(1, lua_gettop(*L));
+
+	}
+
 
 }

@@ -36,12 +36,14 @@ namespace LuaCpp {
 	           private:
 			bool value;
 		   public:
-			LuaTBoolean(bool _value) : LuaType(), value(std::move(_value)) {}
+			explicit LuaTBoolean(bool _value) : LuaType(), value(std::move(_value)) {}
 			~LuaTBoolean() {}
 
 			int getTypeId();
 			std::string getTypeName(LuaState &L);
 			void PushValue(LuaState &L);
+
+			using LuaType::PopValue;
 			void PopValue(LuaState &L, int idx);
 			std::string ToString();
 

@@ -30,11 +30,11 @@ using namespace LuaCpp;
 using namespace LuaCpp::Registry;
 using namespace LuaCpp::Engine;
 
-static int foo (lua_State *L) {
+static int _foo (lua_State *L, int start) {
   int n = lua_gettop(L);    /* number of arguments */
   lua_Number sum = 0.0;
   int i;
-  for (i = 1; i <= n; i++) {
+  for (i = start; i <= n; i++) {
     if (!lua_isnumber(L, i)) {
       lua_pushliteral(L, "incorrect argument");
       lua_error(L);
@@ -46,20 +46,12 @@ static int foo (lua_State *L) {
   return 2;                   /* number of results */
 }
 
+static int foo(lua_State *L) {
+  return _foo(L, 1);
+}
+
 static int foo_meta (lua_State *L) {
-  int n = lua_gettop(L);    /* number of arguments */
-  lua_Number sum = 0.0;
-  int i;
-  for (i = 2; i <= n; i++) {
-    if (!lua_isnumber(L, i)) {
-      lua_pushliteral(L, "incorrect argument");
-      lua_error(L);
-    }
-    sum += lua_tonumber(L, i);
-  }
-  lua_pushnumber(L, sum/n);        /* first result */
-  lua_pushnumber(L, sum);         /* second result */
-  return 2;                   /* number of results */
+  return _foo(L, 2);
 }
 
 int main(int argc, char **argv) {

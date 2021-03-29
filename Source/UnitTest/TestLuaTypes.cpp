@@ -64,6 +64,7 @@ namespace LuaCpp {
 			of << "if not (t['number'] == 5.3) then print('number is not 5.3') sucess = false end" << "\n";
 			of << "if not (t['boolean']) then print('boolean is not true') sucess = false end" << "\n";
 			of << "if not (t['table']['inner-1'] == '1') then print('t[inner-1] is not 1') sucess = false end" << "\n";
+			of << "t['print'] = print" << "\n";
 			of << "if (sucess) then print('pass')  end" << "\n";
 
 
@@ -628,6 +629,10 @@ namespace LuaCpp {
 		EXPECT_NO_THROW(tbl.PushGlobal(*L, "t"));
 
 		EXPECT_EQ(LUA_OK, lua_pcall(*L, 0, LUA_MULTRET, 0));
+
+		EXPECT_NO_THROW(tbl.PopGlobal(*L));
+
+		EXPECT_EQ("function", tbl.getValue(Table::Key("print")).ToString());
 
 		std::string output = testing::internal::GetCapturedStdout();
 

@@ -151,7 +151,7 @@ void LuaTTable::PopValue(LuaState &L, int idx) {
 				field->PopValue(L, -1);
 				break;
 			    }
-			    otherwise: {
+			    default: {
 		                field = std::make_shared<LuaTString>(lua_typename(L, lua_type(L, -1)));
 				break;
 		            }

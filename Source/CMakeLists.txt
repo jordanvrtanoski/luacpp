@@ -106,6 +106,11 @@ add_dependencies(testLuaCompiler googletest)
 target_link_libraries(testLuaCompiler luacpp_static gtest_main gtest pthread)
 gtest_discover_tests(testLuaCompiler)
 
+add_executable(testLuaMetaObject UnitTest/TestLuaMetaObject.cpp)
+add_dependencies(testLuaMetaObject googletest)
+target_link_libraries(testLuaMetaObject luacpp_static gtest_main gtest pthread)
+gtest_discover_tests(testLuaMetaObject)
+
 ##########
 # Coverage
 ##########

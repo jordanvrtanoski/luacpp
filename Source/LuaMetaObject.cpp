@@ -25,12 +25,11 @@
 #include <iostream>
 
 #include "LuaMetaObject.hpp"
-
-extern "C" {
-	static int u_newindex(lua_State *L);
-	static int u_index(lua_State *L);
-	static int u_call(lua_State *L);
-}
+#include "Engine/LuaTNil.hpp"
+#include "Engine/LuaTTable.hpp"
+#include "Engine/LuaTString.hpp"
+#include "Engine/LuaTNumber.hpp"
+#include "Engine/LuaTBoolean.hpp"
 
 using namespace LuaCpp;
 using namespace LuaCpp::Engine;
@@ -48,47 +47,92 @@ void LuaMetaObject::_storeData() {
 void LuaMetaObject::_retreiveData() {
 }
 
-int LuaMetaObject::getValue(LuaState &L) {
+std::shared_ptr<LuaType> LuaMetaObject::getValue(int key) {
+	return std::make_shared<LuaTNil>();
+}
+
+std::shared_ptr<LuaType> LuaMetaObject::getValue(std::string &key) {
+	return std::make_shared<LuaTNil>();
+}
+
+void LuaMetaObject::setValue(int key, std::shared_ptr<LuaType> val) {
+}
+
+void LuaMetaObject::setValue(std::string &key, std::shared_ptr<LuaType> val) {
+}
+
+int LuaMetaObject::_getValue(LuaState &L) {
 	if (lua_type(L, 2) == LUA_TSTRING) {
-		std::cout << "Calling getValue() with "<< lua_tostring(L, 2) << "\n";
+		std::string key(lua_tostring(L, 2));
+		getValue(key)->PushValue(L);
 	} else {
-		std::cout << "Calling getValue() with "<< std::to_string(lua_tointeger(L, 2)) << "\n";
+		getValue(lua_tointeger(L,2))->PushValue(L);
 	}
-	lua_pushstring(L, "testing");
 	return 1;
 }
 
 
-int LuaMetaObject::setValue(LuaState &L) {
-	std::cout << "setValue() \n";
-	L.PrintStack(std::cout);
+int LuaMetaObject::_setValue(LuaState &L) {
+        std::shared_ptr<LuaType> val = std::make_shared<LuaTNil>();
+	switch (lua_type(L, -1)) {
+	    case LUA_TSTRING: {
+		val = std::make_shared<LuaTString>("");
+		val->PopValue(L, -1);
+		break;
+	    }  
+	    case LUA_TTABLE: {
+	        val = std::make_shared<LuaTTable>();
+		val->PopValue(L, -1);
+		break;
+	    }
+	    case LUA_TNUMBER: {
+	        val = std::make_shared<LuaTNumber>(0);
+		val->PopValue(L, -1);
+		break;
+            }
+	    case LUA_TBOOLEAN: {
+	        val = std::make_shared<LuaTBoolean>(false);
+		val->PopValue(L, -1);
+		break;
+	    }
+	    default: {
+                val = std::make_shared<LuaTString>(lua_typename(L, lua_type(L, -1)));
+		break;
+            }
+	}
+	if (lua_type(L, 2) == LUA_TSTRING) {
+		std::string key(lua_tostring(L, 2));
+		setValue(key, val);
+	} else {
+		int key = lua_tointeger(L,2);
+		setValue(key, val);
+	}
+
 	return 0;
 }
 
 int LuaMetaObject::Execute(LuaState &L) {
-	std::cout << "Execute() \n";
-	L.PrintStack(std::cout);
 	return 0;
 }
 
-static int u_newindex(lua_State *L) {
+static int LuaCpp::u_newindex(lua_State *L) {
 	void * ud = lua_touserdata(L, 1);
 	LuaState _L(L, true);
-	int res = (**((LuaMetaObject **) ud)).setValue(_L);
+	int res = (**((LuaMetaObject **) ud))._setValue(_L);
 
 	return res;
 }
 
-static int u_index(lua_State *L) {
+static int LuaCpp::u_index(lua_State *L) {
 	void * ud = lua_touserdata(L, 1);
 	LuaState _L(L, true);
-	int res = (**((LuaMetaObject **) ud)).getValue(_L);
+	int res = (**((LuaMetaObject **) ud))._getValue(_L);
 
 	return res;
 }
 
 
-static int u_call(lua_State *L) {
+static int LuaCpp::u_call(lua_State *L) {
 	void * ud = lua_touserdata(L, 1);
 	LuaState _L(L, true);
 	int res = (**((LuaMetaObject **) ud)).Execute(_L);

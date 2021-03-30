@@ -218,6 +218,11 @@ if (DOXYGEN_FOUND)
 	WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM )
+    add_custom_target( doc_pdf
+	COMMAND cd doc_doxygen/latex && make pdf
+	COMMAND mv doc_doxygen/latex/refman.pdf ${CMAKE_BINARY_DIR}/luacpp.pdf
+	DEPENDS doc_doxygen
+    )
 else (DOXYGEN_FOUND)
   message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)

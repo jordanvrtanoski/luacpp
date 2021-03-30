@@ -22,9 +22,12 @@
    SOFTWARE.
    */
 
-#include "LuaContext.hpp"
 #include <stdexcept>
 #include <iostream>
+#include <filesystem>
+
+#include "LuaContext.hpp"
+#include "LuaVersion.hpp"
 
 using namespace LuaCpp;
 using namespace LuaCpp::Engine;
@@ -32,21 +35,32 @@ using namespace LuaCpp::Registry;
 
 
 std::unique_ptr<LuaState> LuaContext::newState() {
+	return newState(globalEnvironment);
+}
+
+std::unique_ptr<LuaState> LuaContext::newState(const LuaEnvironment &env) {
 	std::unique_ptr<LuaState> L = std::make_unique<LuaState>();
 	luaL_openlibs(*L);
 	for(const auto &lib : libraries ) {
 		((std::shared_ptr<LuaLibrary>) lib.second)->RegisterFunctions(*L);
 	}
-	for(const auto &var : globalVariables) {
+	for(const auto &var : env) {
 		((std::shared_ptr<LuaType>) var.second)->PushGlobal(*L, var.first);
 	}
+	lua_pushstring(*L, std::string(LuaCpp::Version).c_str());
+	lua_setglobal(*L, "_luacppversion");
+
 	return L;
 }
 
 std::unique_ptr<LuaState> LuaContext::newStateFor(const std::string &name) {
+	return newStateFor(name, globalEnvironment);
+}
+
+std::unique_ptr<LuaState> LuaContext::newStateFor(const std::string &name, const LuaEnvironment &env) {
 	if (registry.Exists(name)) {
 		std::unique_ptr<LuaCodeSnippet> cs = registry.getByName(name);
-		std::unique_ptr<LuaState> L = newState();
+		std::unique_ptr<LuaState> L = newState(env);
 		cs->UploadCode(*L);
 		return L;	
 	}	
@@ -69,6 +83,32 @@ void LuaContext::CompileFile(const std::string &name, const std::string &fname, 
 	registry.CompileAndAddFile(name,fname, recompile);
 }
 
+void LuaContext::CompileFolder(const std::string &path) {
+	CompileFolder(path, "", false);
+}
+
+void LuaContext::CompileFolder(const std::string &path, const std::string &prefix) {
+	CompileFolder(path, prefix, false);
+}
+
+void LuaContext::CompileFolder(const std::string &path, const std::string &prefix, bool recompile) {
+	for (const auto &entry : std::filesystem::directory_iterator(path)) {
+		if (entry.is_regular_file()){
+			std::filesystem::path path = entry.path();
+			if (path.extension() == ".lua") {
+				try {
+					if (prefix == "") {
+						CompileFile(path.stem().native() ,path, recompile);
+					} else {
+						CompileFile(prefix+"."+path.stem().native() ,path, recompile);
+					}
+				} catch (std::logic_error &e) {
+				}
+			}
+		}
+	}
+}
+
 void LuaContext::CompileStringAndRun(const std::string &code) {
 	registry.CompileAndAddString("default", code, true);
 	Run("default");
@@ -80,15 +120,23 @@ void LuaContext::CompileFileAndRun(const std::string &code) {
 }
 
 void LuaContext::Run(const std::string &name) {
+	RunWithEnvironment(name, globalEnvironment);
+}
+
+void LuaContext::RunWithEnvironment(const std::string &name, const LuaEnvironment &env) {
 	std::unique_ptr<LuaState> L = newStateFor(name);
 	
+	for(const auto &var : env) {
+		((std::shared_ptr<LuaType>) var.second)->PushGlobal(*L, var.first);
+	}
+
 	int res = lua_pcall(*L, 0, LUA_MULTRET, 0);
 	if (res != LUA_OK ) {
 		L->PrintStack(std::cout);
 		throw std::runtime_error(lua_tostring(*L,1));
 	}
 
-	for(const auto &var : globalVariables) {
+	for(const auto &var : env) {
 		((std::shared_ptr<LuaType>) var.second)->PopGlobal(*L);
 	}
 
@@ -99,10 +147,10 @@ void LuaContext::AddLibrary(std::shared_ptr<Registry::LuaLibrary> &library) {
 }
 
 void LuaContext::AddGlobalVariable(const std::string &name, std::shared_ptr<Engine::LuaType> var) {
-	globalVariables[name] = std::move(var);
+	globalEnvironment[name] = std::move(var);
 }
 
 std::shared_ptr<Engine::LuaType> &LuaContext::getGlobalVariable(const std::string &name) {
-	return globalVariables[name];
+	return globalEnvironment[name];
 }
 

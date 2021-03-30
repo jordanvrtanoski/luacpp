@@ -22,17 +22,27 @@ jobs:
       - run: mkdir build
       - run: cd build && cmake -DCMAKE_BUILD_TYPE=Coverage ../Source && make -j4
       - run: cd build && make coverage-cli
-      - run: lcov -c -d . -b . --output-file coverage.info
-      - run: lcov --remove coverage.info '/usr/include/*' --output coverage.info
-      - run: lcov --remove coverage.info '*/build/googletest-install/*' --output coverage.info
-      - run: lcov --list coverage.info
+      - run: cd build && make coverage-lcov
       - coveralls/upload:
          verbose: true
-         path_to_lcov: coverage.info
+         path_to_lcov: build/coverage.info
 
+  memory:
+    executor: c-build-env
+    steps:
+      - run: DEBIAN_FRONTEND=noninteractive apt update
+      - run: DEBIAN_FRONTEND=noninteractive apt install -y build-essential liblua5.3-dev lua5.3 git cmake valgrind lcov npm texlive-latex-base texlive-latex-recommended texlive-latex-extra graphviz gcovr
+      - run: rm -rf luacpp
+      - checkout
+      - run: pwd && ls -ltr
+      - run: mkdir debug
+      - run: cd debug && cmake -DCMAKE_BUILD_TYPE=Debug ../Source && make -j4
+      - run: cd debug && make test_memory
+      
 workflows:
   # Name the workflow "welcome"
-  welcome:
+  build:
     # Run the welcome/run job in its own container
     jobs:
       - coverage
+      - memory

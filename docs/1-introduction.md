@@ -1,20 +1,9 @@
-# LuaCpp
-[![<ORG_NAME>](https://circleci.com/gh/jordanvrtanoski/luacpp/tree/main.svg?style=shield)](https://circleci.com/gh/jordanvrtanoski/luacpp)
-[![Coverage Status](https://coveralls.io/repos/github/jordanvrtanoski/luacpp/badge.svg?branch=main)](https://coveralls.io/github/jordanvrtanoski/luacpp?branch=main)
-[![CodeQL](https://github.com/jordanvrtanoski/luacpp/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/jordanvrtanoski/luacpp/actions/workflows/codeql-analysis.yml)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0f2b745e91164b2d8a573891ce1db457)](https://www.codacy.com/gh/jordanvrtanoski/luacpp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jordanvrtanoski/luacpp&amp;utm_campaign=Badge_Grade)
-
-Lua CPP wrapper for rapid inclusion of Lua interpreter to C++ projects.
-
-![Logo](.github/IMAGES/luacpp.jpg?raw=true "Logo")
-
-## TL;DR;
+# Introduction
 
 LuaCpp is a C++ library that wraps the `liblua` library and it's `C` API to provides a set of high level C++ classes that are managing the complexity of the Lua integaration.
 
 Adding lua support can be as simple as adding few lines of code to the project. Following is the LuaCpp Hello World example
 
-**hello.c**
 ```c++
 #include <LuaCpp.hpp>
 #include <iostream>
@@ -39,13 +28,6 @@ int main(int argc, char **argv) {
 }
 ```
 
-Compile the code with 
-```
-~$ gcc hello.cpp -I /usr/local/include/LuaCpp -I /usr/include/lua5.3/ -lluacpp -llua5.3 -lstdc++ -o hello
-~$ hello
-Hi from C++, this is a demo how LuaCpp can be used
-The fastest way to start using lua in a project
-```
 To have the information about the `C++` classes and utility functions, make the `doc_pdf` target which
 generates the full reference and user manual.
 
@@ -259,3 +241,4 @@ make -j 4
 make coverage-cli
 make coverage-html
 ```
+

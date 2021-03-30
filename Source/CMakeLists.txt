@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.9)
-project(luacpp)
+project(LuaCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
 # Source files
 set(SOURCE_FILES
 	Lua.hpp
-	LuaCpp.cpp LuaCpp.hpp
+	LuaCpp.hpp
+	LuaVersion.cpp LuaVersion.hpp
 	Engine/LuaState.cpp Engine/LuaState.hpp
 	Engine/LuaType.cpp Engine/LuaType.hpp
 	Engine/LuaTNil.cpp Engine/LuaTNil.hpp
@@ -40,16 +41,16 @@ target_link_libraries(luacpp_static ${LUA_LIBRARIES})
 ##########
 # Examples
 ##########
-add_executable(hello Example/example_helloworld.cpp)
-target_link_libraries(hello luacpp_static)
+add_executable(example_helloworld Example/example_helloworld.cpp)
+target_link_libraries(example_helloworld luacpp)
 
-add_executable(test_lualib Example/example_LuaLibrary.cpp)
-target_link_libraries(test_lualib luacpp_static)
+add_executable(example_LuaLibrary Example/example_LuaLibrary.cpp)
+target_link_libraries(example_LuaLibrary luacpp)
 
-add_executable(test_metaobj Example/example_LuaMetaObject.cpp)
-target_link_libraries(test_metaobj luacpp_static)
+add_executable(example_LuaMetaObject Example/example_LuaMetaObject.cpp)
+target_link_libraries(example_LuaMetaObject luacpp)
 
-add_custom_command(TARGET hello POST_BUILD
+add_custom_command(TARGET example_helloworld POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Example/hello.lua ${PROJECT_BINARY_DIR}/hello.lua
 	COMMENT "${PROJECT_BINARY_DIR}/hello.lua copied to build" 
 )
@@ -57,19 +58,45 @@ add_custom_command(TARGET hello POST_BUILD
 #########
 # Install
 #########
+include(CMakePackageConfigHelpers)
+
+set(CMAKE_CONFIG_DEST "${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/cmake")
+set(LuaCpp_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
+set(LuaCpp_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+
 install(TARGETS luacpp
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(TARGETS luacpp_static
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES LuaCpp.hpp DESTINATION "include/LuaCpp")
-install(DIRECTORY ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/Registry ${CMAKE_SOURCE_DIR}/Engine
-	DESTINATION "include/LuaCpp"
+install(FILES LuaCpp.hpp Lua.hpp LuaContext.hpp LuaMetaObject.hpp LuaVersion.hpp 
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/Registry ${CMAKE_SOURCE_DIR}/Engine
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
         FILES_MATCHING
         PATTERN "*.hpp"
 )
-
+configure_package_config_file(
+	LuaCppConfig.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfig.cmake
+	INSTALL_DESTINATION "${CMAKE_CONFIG_DEST}"
+	PATH_VARS
+		LuaCpp_INCLUDE_DIR
+		LuaCpp_INSTALL_LIBDIR
+)
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfigVersion.cmake
+  	VERSION 0.1.0
+  	COMPATIBILITY SameMajorVersion
+	ARCH_INDEPENDENT
+)
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfigVersion.cmake
+	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfig.cmake
+	DESTINATION ${CMAKE_CONFIG_DEST}
+)
 
 #########
 # Testing
@@ -111,6 +138,22 @@ add_dependencies(testLuaMetaObject googletest)
 target_link_libraries(testLuaMetaObject luacpp_static gtest_main gtest pthread)
 gtest_discover_tests(testLuaMetaObject)
 
+
+#############
+# Memory Test
+#############
+find_program(valgrind valgrind)
+
+if (valgrind)
+	message(STATUS "Found command 'valgrand' => Use target 'test_memory' to perform memory test")
+	add_custom_target( test_memory
+		COMMAND valgrind -v --run-cxx-freeres=yes --run-libc-freeres=yes make test 
+	)
+else()
+	message(WARNING "Cannot find command 'valgrand' => Please install package 'valgrand' to run memory tests")
+endif()
+
+
 ##########
 # Coverage
 ##########
@@ -126,6 +169,7 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
 
     find_program (gcovr gcovr)
+    find_program (lcov lcov)
 
     if (gcovr)
 	message (STATUS "Found command 'gcovr' => Use target 'coverage-html' or 'coverage-cli' to generate coverage report '${CMAKE_BINARY_DIR}/gcovr.html'")
@@ -172,9 +216,27 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
 			     --exclude-throw-branches
          ) 
     else()
-         message(FATAL_ERROR "Cannot find command 'gcovr' => Please install package 'gcovr' to generate code coverage report (HTML)")
+	 message(FATAL_ERROR "Cannot find command 'gcovr' => Please install package 'gcovr' to generate code coverage report (JSON, CLI, HTML)")
     endif()
 
+    if(lcov)
+	add_custom_target (coverage-lcov
+	    COMMAND make test
+	    COMMAND echo "======= ${PROJECT_DIR} =============="
+            COMMAND ${lcov}  --capture
+	                     --directory        ${CMAKE_BINARY_DIR}
+			     --base-directory   ${CMAKE_SOURCE_DIR}
+                             --output-file      ${CMAKE_BINARY_DIR}/coverage.info
+			     --rc               lcov_branch_coverage=1
+            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '/usr/include/*' 
+	                     --output ${CMAKE_BINARY_DIR}/coverage.info
+            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '*/build/googletest-install/*' 
+	                     --output ${CMAKE_BINARY_DIR}/coverage.info
+            COMMAND ${lcov}  --list   ${CMAKE_BINARY_DIR}/coverage.info 
+         ) 
+    else()
+	    message(WARNING "Cannot find command 'lcov' => Please install package 'lcov' to generate code coverage report (Coveralls)")
+    endif()
 endif()
 
 ###########
@@ -199,6 +261,11 @@ if (DOXYGEN_FOUND)
 	WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM )
+    add_custom_target( doc_pdf
+	COMMAND cd doc_doxygen/latex && make pdf
+	COMMAND mv doc_doxygen/latex/refman.pdf ${CMAKE_BINARY_DIR}/luacpp.pdf
+	DEPENDS doc_doxygen
+    )
 else (DOXYGEN_FOUND)
   message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)

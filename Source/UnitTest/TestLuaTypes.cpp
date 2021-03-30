@@ -29,6 +29,30 @@
 
 using namespace LuaCpp::Engine;
 
+extern "C" {
+   static int _foo (lua_State *L, int start) {
+     int n = lua_gettop(L);    /* number of arguments */
+     lua_Number sum = 0.0;
+     int i;
+     for (i = start; i <= n; i++) {
+/*
+       if (!lua_isnumber(L, i)) {
+         lua_pushliteral(L, "incorrect argument");
+         lua_error(L);
+       }
+*/
+       sum += lua_tonumber(L, i);
+     }
+     lua_pushnumber(L, sum/n);        /* first result */
+     lua_pushnumber(L, sum);         /* second result */
+     return 2;                   /* number of results */
+   }
+   
+   static int foo_meta (lua_State *L) {
+     return _foo(L, 2);
+   }
+}
+
 namespace LuaCpp {
 
 	class TestLuaTypes : public ::testing::Test {
@@ -40,6 +64,7 @@ namespace LuaCpp {
 			of << "if not (t['number'] == 5.3) then print('number is not 5.3') sucess = false end" << "\n";
 			of << "if not (t['boolean']) then print('boolean is not true') sucess = false end" << "\n";
 			of << "if not (t['table']['inner-1'] == '1') then print('t[inner-1] is not 1') sucess = false end" << "\n";
+			of << "t['print'] = print" << "\n";
 			of << "if (sucess) then print('pass')  end" << "\n";
 
 
@@ -605,11 +630,116 @@ namespace LuaCpp {
 
 		EXPECT_EQ(LUA_OK, lua_pcall(*L, 0, LUA_MULTRET, 0));
 
+		EXPECT_NO_THROW(tbl.PopGlobal(*L));
+
+		EXPECT_EQ("function", tbl.getValue(Table::Key("print")).ToString());
+
 		std::string output = testing::internal::GetCapturedStdout();
 
 		EXPECT_EQ("pass\n", output);
 
 		
+	}
+
+	TEST_F(TestLuaTypes, TestLuaTypeBaseClass) {
+		/**
+		 * Basic test getting instance of the `lua_State *`
+		 */
+		LuaContext ctx;
+
+		std::unique_ptr<LuaState> L = ctx.newState();
+		
+		LuaTString str("test_string");
+		LuaTString str2("");
+
+		// Assure the types are set correctly
+		EXPECT_EQ(LUA_TSTRING, str.getTypeId());
+		EXPECT_EQ("string", str.getTypeName(*L));
+
+		// Push and Pop global
+		EXPECT_NO_THROW(str.PushGlobal(*L, "test"));
+		EXPECT_NO_THROW(str.PopGlobal(*L));
+
+		EXPECT_EQ("test_string", str.getValue());
+		EXPECT_EQ("test", str.getGlobalName());
+		EXPECT_EQ(true, str.isGlobal());
+
+		// Pop global in new value
+		EXPECT_EQ(false, str2.isGlobal());
+		EXPECT_NO_THROW(str2.PopGlobal(*L, "test"));
+
+		EXPECT_EQ("test_string", str2.getValue());
+		EXPECT_EQ("test", str2.getGlobalName());
+		EXPECT_EQ(true, str2.isGlobal());
+
+		EXPECT_NO_THROW(str.PushValue(*L));
+		EXPECT_NO_THROW(str.PopValue(*L));
+		EXPECT_EQ(1, lua_gettop(*L));
+
+	}
+
+	TEST_F(TestLuaTypes, TestLuaTUserData) {
+		/**
+		 * Basic test getting instance of the `lua_State *`
+		 */
+		LuaContext ctx;
+
+		std::unique_ptr<LuaState> L = ctx.newState();
+
+		LuaTUserData ud(sizeof(LuaTUserData)), ud2(sizeof(LuaTUserData));
+
+		// Assure the types are set correctly
+		EXPECT_EQ(LUA_TUSERDATA, ud.getTypeId());
+		EXPECT_EQ("userdata", ud.getTypeName(*L));
+
+		// Assure the state is prepared for testing
+		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_EQ(0, lua_gettop(*L));
+
+		EXPECT_EQ("userdata", ud.ToString());
+
+		// Assure pushing the value
+		EXPECT_NO_THROW(ud.PushValue(*L));
+		EXPECT_EQ(1, lua_gettop(*L));
+		EXPECT_EQ(LUA_TUSERDATA, lua_type(*L, -1));
+		EXPECT_NE((void *) NULL, ud.getRawUserData());
+
+		// Assure popping the value in relative referencing
+		EXPECT_NO_THROW(ud.PopValue(*L, -1));
+		EXPECT_NE((void *) NULL, ud.getRawUserData());
+
+		// Assure pooping the value with absolute referencing
+		EXPECT_NO_THROW(ud.PopValue(*L, 1));
+		EXPECT_NE((void *) NULL, ud.getRawUserData());
+
+		// Push new value on stacks
+		lua_pushnil(*L);
+
+		// Assure popping the value in relative referencing
+		EXPECT_THROW(ud.PopValue(*L, -1), std::invalid_argument);
+
+		// Assure pooping the value with absolute referencing
+		EXPECT_THROW(ud.PopValue(*L, 2), std::invalid_argument);
+		
+		L.reset();
+		EXPECT_NO_THROW(ctx.CompileString("test", "print('Calling foo as a metafunction of a usertype ' .. foo(1,2,3,4))"));
+
+		L = ctx.newStateFor("test");
+
+		// Test meta function
+		EXPECT_NO_THROW(ud.AddMetaFunction("__call", foo_meta));
+		EXPECT_NO_THROW(ud.PushGlobal(*L, "foo"));
+
+		testing::internal::CaptureStdout();
+		EXPECT_EQ(0, lua_pcall(*L, 0, LUA_MULTRET, 0));
+		std::string output = testing::internal::GetCapturedStdout();
+
+		EXPECT_EQ("Calling foo as a metafunction of a usertype 2.0\n", output);
+
+		// Try to mix the variables
+
+		EXPECT_NO_THROW(ud.PushValue(*L));
+		EXPECT_THROW(ud2.PopValue(*L,-1), std::domain_error);
 	}
 
 

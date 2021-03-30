@@ -3,7 +3,9 @@ Lua CPP wrapper
 
 ## Build Status
 [![<ORG_NAME>](https://circleci.com/gh/jordanvrtanoski/luacpp/tree/circleci-project-setup.svg?style=shield)](https://circleci.com/gh/jordanvrtanoski/luacpp)
-
+[![Coverage Status](https://coveralls.io/repos/github/jordanvrtanoski/luacpp/badge.svg?branch=circleci-project-setup)](https://coveralls.io/github/jordanvrtanoski/luacpp?branch=main)
+[![CodeQL](https://github.com/jordanvrtanoski/luacpp/actions/workflows/codeql-analysis.yml/badge.svg?branch=circleci-project-setup)](https://github.com/jordanvrtanoski/luacpp/actions/workflows/codeql-analysis.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0f2b745e91164b2d8a573891ce1db457)](https://www.codacy.com/gh/jordanvrtanoski/luacpp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jordanvrtanoski/luacpp&amp;utm_campaign=Badge_Grade)
 
 ## Installing
 

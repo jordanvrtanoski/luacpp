@@ -26,19 +26,39 @@
 #ifndef LUACPP_LUAMETAOBJECT_HPP
 #define LUACPP_LUAMETAOBJECT_HPP
 
+#include <memory>
+
 #include "Lua.hpp"
 #include "Engine/LuaState.hpp"
 #include "Engine/LuaTUserData.hpp"
 
 namespace LuaCpp {
+
+	extern "C" {
+		static int u_newindex(lua_State *L);
+		static int u_index(lua_State *L);
+		static int u_call(lua_State *L);
+	}
+
 	class LuaMetaObject : public Engine::LuaTUserData {
+		friend int u_newindex(lua_State *L);
+		friend int u_index(lua_State *L);
+		friend int u_call(lua_State *L);
+
 	   protected:
 		void _storeData();
 		void _retreiveData();
+		virtual int _getValue(Engine::LuaState &L);
+		virtual int _setValue(Engine::LuaState &L);
+
 	   public:
 		LuaMetaObject(); 
-		virtual int getValue(Engine::LuaState &L);
-		virtual int setValue(Engine::LuaState &L);
+		
+		virtual std::shared_ptr<LuaType> getValue(int key);
+		virtual std::shared_ptr<LuaType> getValue(std::string &key);
+		virtual void setValue(int key, std::shared_ptr<LuaType> val);
+		virtual void setValue(std::string &key, std::shared_ptr<LuaType> val);
+
 		virtual int Execute(Engine::LuaState &L);
 	};
 }

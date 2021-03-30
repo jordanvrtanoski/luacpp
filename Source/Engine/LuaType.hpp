@@ -43,10 +43,14 @@ namespace LuaCpp {
 			virtual void PushValue(LuaState &L) = 0;
 			virtual void PopValue(LuaState &L, int idx) = 0;
 			virtual std::string ToString() = 0;
-
+			
 			void PopValue(LuaState &L);
 			void PushGlobal(LuaState &L, std::string global_name);
 			void PopGlobal(LuaState &L);
+			void PopGlobal(LuaState &L, std::string global_name);
+
+			bool isGlobal();
+			std::string getGlobalName();
 		};
 	}
 }

@@ -40,11 +40,11 @@ namespace LuaCpp {
 			int getTypeId();
 			std::string getTypeName(LuaState &L);
 			void PushValue(LuaState &L);
+
+			using LuaType::PopValue;
 			void PopValue(LuaState &L, int idx);
 			std::string ToString();
-
 		};
 	}
 }
 #endif // LUACPP_LUATNIL_HPP
-

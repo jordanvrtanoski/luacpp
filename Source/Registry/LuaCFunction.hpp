@@ -45,7 +45,7 @@ namespace LuaCpp {
 
 	           public:
 			LuaCFunction() {};
-			LuaCFunction(lua_CFunction _cfunction) : cfunction(_cfunction) {};
+			explicit LuaCFunction(lua_CFunction _cfunction) : cfunction(_cfunction) {};
 			~LuaCFunction() {};
 
 			void setName(std::string name);

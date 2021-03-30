@@ -101,13 +101,23 @@ add_dependencies(testLuaTypes googletest)
 target_link_libraries(testLuaTypes luacpp_static gtest_main gtest pthread)
 gtest_discover_tests(testLuaTypes)
 
+add_executable(testLuaCompiler UnitTest/TestLuaCompiler.cpp)
+add_dependencies(testLuaCompiler googletest)
+target_link_libraries(testLuaCompiler luacpp_static gtest_main gtest pthread)
+gtest_discover_tests(testLuaCompiler)
+
+add_executable(testLuaMetaObject UnitTest/TestLuaMetaObject.cpp)
+add_dependencies(testLuaMetaObject googletest)
+target_link_libraries(testLuaMetaObject luacpp_static gtest_main gtest pthread)
+gtest_discover_tests(testLuaMetaObject)
+
 ##########
 # Coverage
 ##########
 
 if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
     if( NOT CMAKE_COMPILER_IS_GNUCXX AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
-        message(WARNING "<coverage.cmake> Coverage not yet implemented for your compiler '${CMAKE_CXX_COMPILER_ID}' (only GNU and Clang)")
+        message(WARNING "Coverage not yet implemented for your compiler '${CMAKE_CXX_COMPILER_ID}' (only GNU and Clang)")
         return()
     endif()
 
@@ -116,6 +126,7 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
 
     find_program (gcovr gcovr)
+    find_program (lcov lcov)
 
     if (gcovr)
 	message (STATUS "Found command 'gcovr' => Use target 'coverage-html' or 'coverage-cli' to generate coverage report '${CMAKE_BINARY_DIR}/gcovr.html'")
@@ -135,6 +146,20 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
 			     --exclude-throw-branches
             COMMAND echo "To display coverage report: firefox ${CMAKE_BINARY_DIR}/gcovr.html"
          ) 
+	add_custom_target (coverage-json
+	    COMMAND make test
+            COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}
+                             --exclude          ${CMAKE_SOURCE_DIR}/3rdparty
+			     --exclude          ${CMAKE_SOURCE_DIR}/Example
+                             --exclude          ${CMAKE_BINARY_DIR}
+                             --object-directory ${CMAKE_BINARY_DIR}
+                             --sort-uncovered
+                             --print-summary
+                             --exclude-unreachable-branches
+			     --exclude-throw-branches
+			     --json 
+			     --output coverallis.json
+	)
 	add_custom_target (coverage-cli
 	    COMMAND make test
             COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}
@@ -148,9 +173,27 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
 			     --exclude-throw-branches
          ) 
     else()
-         message(FATAL_ERROR "Cannot find command 'gcovr' => Please install package 'gcovr' to generate code coverage report (HTML)")
+	 message(FATAL_ERROR "Cannot find command 'gcovr' => Please install package 'gcovr' to generate code coverage report (JSON, CLI, HTML)")
     endif()
 
+    if(lcov)
+	add_custom_target (coverage-lcov
+	    COMMAND make test
+	    COMMAND echo "======= ${PROJECT_DIR} =============="
+            COMMAND ${lcov}  --capture
+	                     --directory        ${CMAKE_BINARY_DIR}
+			     --base-directory   ${CMAKE_SOURCE_DIR}
+                             --output-file      ${CMAKE_BINARY_DIR}/coverage.info
+			     --rc               lcov_branch_coverage=1
+            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '/usr/include/*' 
+	                     --output ${CMAKE_BINARY_DIR}/coverage.info
+            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '*/build/googletest-install/*' 
+	                     --output ${CMAKE_BINARY_DIR}/coverage.info
+            COMMAND ${lcov}  --list   ${CMAKE_BINARY_DIR}/coverage.info 
+         ) 
+    else()
+	    message(WARNING "Cannot find command 'lcov' => Please install package 'lcov' to generate code coverage report (Coveralls)")
+    endif()
 endif()
 
 ###########

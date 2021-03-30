@@ -44,12 +44,14 @@ namespace LuaCpp {
 			virtual void _storeData();
 			virtual void _retreiveData();
 		   public:
-			LuaTUserData(size_t _size) : size(_size), LuaType(), userdata(NULL), metatable() {}
+			explicit LuaTUserData(size_t _size) : size(_size), LuaType(), userdata(NULL), metatable() {}
 			~LuaTUserData() {}
 
 			int getTypeId();
 			std::string getTypeName(LuaState &L);
 			void PushValue(LuaState &L);
+
+			using LuaType::PopValue;
 			void PopValue(LuaState &L, int idx);
 			std::string ToString();
 

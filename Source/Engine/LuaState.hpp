@@ -69,7 +69,7 @@ namespace LuaCpp {
 			 * user, since the class will autmaticaly close the state
 			 * one the instance is destroyed.
 			 */
-			explicit LuaState(lua_State *_L) : L(_L) {}
+			explicit LuaState(lua_State *_L) : L(_L), shared(false) {}
 		
 			/**
 			 * @brief Constructor that creates a new state

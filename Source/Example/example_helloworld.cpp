@@ -70,11 +70,11 @@ int main(int argc, char **argv) {
 	bol.PushGlobal(*L, "test_bool");
 
 	LuaTTable tbl;
-	tbl.setValue("t1", std::make_shared<LuaTString>("Test 1"));
-	tbl.setValue("t2", std::make_shared<LuaTString>("Test 2"));
-	tbl.setValue("t4", std::make_shared<LuaTBoolean>("false"));
-	tbl.setValue("t5", std::make_shared<LuaTNumber>(12.2));
-	tbl.setValue(1, std::make_shared<LuaTNumber>(1));
+	tbl.setValue(Table::Key("t1"), std::make_shared<LuaTString>("Test 1"));
+	tbl.setValue(Table::Key("t2"), std::make_shared<LuaTString>("Test 2"));
+	tbl.setValue(Table::Key("t4"), std::make_shared<LuaTBoolean>("false"));
+	tbl.setValue(Table::Key("t5"), std::make_shared<LuaTNumber>(12.2));
+	tbl.setValue(Table::Key(1), std::make_shared<LuaTNumber>(1));
 
 	tbl.PushGlobal(*L, "test_tbl");
 

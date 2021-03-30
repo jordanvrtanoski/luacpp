@@ -30,36 +30,30 @@ using namespace LuaCpp;
 using namespace LuaCpp::Registry;
 using namespace LuaCpp::Engine;
 
-static int foo (lua_State *L) {
-  int n = lua_gettop(L);    /* number of arguments */
-  lua_Number sum = 0.0;
-  int i;
-  for (i = 1; i <= n; i++) {
-    if (!lua_isnumber(L, i)) {
-      lua_pushliteral(L, "incorrect argument");
-      lua_error(L);
-    }
-    sum += lua_tonumber(L, i);
-  }
-  lua_pushnumber(L, sum/n);        /* first result */
-  lua_pushnumber(L, sum);         /* second result */
-  return 2;                   /* number of results */
-}
-
-static int foo_meta (lua_State *L) {
-  int n = lua_gettop(L);    /* number of arguments */
-  lua_Number sum = 0.0;
-  int i;
-  for (i = 2; i <= n; i++) {
-    if (!lua_isnumber(L, i)) {
-      lua_pushliteral(L, "incorrect argument");
-      lua_error(L);
-    }
-    sum += lua_tonumber(L, i);
-  }
-  lua_pushnumber(L, sum/n);        /* first result */
-  lua_pushnumber(L, sum);         /* second result */
-  return 2;                   /* number of results */
+extern "C" {
+   static int _foo (lua_State *L, int start) {
+     int n = lua_gettop(L);    /* number of arguments */
+     lua_Number sum = 0.0;
+     int i;
+     for (i = start; i <= n; i++) {
+       if (!lua_isnumber(L, i)) {
+         lua_pushliteral(L, "incorrect argument");
+         lua_error(L);
+       }
+       sum += lua_tonumber(L, i);
+     }
+     lua_pushnumber(L, sum/n);        /* first result */
+     lua_pushnumber(L, sum);         /* second result */
+     return 2;                   /* number of results */
+   }
+   
+   static int foo(lua_State *L) {
+     return _foo(L, 1);
+   }
+   
+   static int foo_meta (lua_State *L) {
+     return _foo(L, 2);
+   }
 }
 
 int main(int argc, char **argv) {
@@ -68,11 +62,11 @@ int main(int argc, char **argv) {
 	LuaContext lua;
 
 	// Create library "foo" conatining the "foo" function
-	std::unique_ptr<LuaLibrary> lib = std::make_unique<LuaLibrary>("foolib");
+	std::shared_ptr<LuaLibrary> lib = std::make_shared<LuaLibrary>("foolib");
 	lib->AddCFunction("foo", foo);
 
 	// Add library to the context
-	lua.AddLibrary(std::move(lib));
+	lua.AddLibrary(lib);
 
 	// Compile a code using the new foolib.foo function
 	lua.CompileString("foo_test", "print(\"Result of calling foolib.foo(1,2,3,4) = \" .. foolib.foo(1,2,3,4))");

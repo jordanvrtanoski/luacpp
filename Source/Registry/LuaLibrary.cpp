@@ -33,19 +33,19 @@ std::string LuaLibrary::getName() {
 	return name;
 }
 
-void LuaLibrary::setName(std::string _name) {
+void LuaLibrary::setName(const std::string &_name) {
 	name = std::move(_name);
 }
 
-bool inline LuaLibrary::Exists(std::string name) {
+bool inline LuaLibrary::Exists(const std::string &name) {
 	return !(functions.find( name ) == functions.end());
 }
 
-void LuaLibrary::AddCFunction(std::string name, lua_CFunction cfunction) {
+void LuaLibrary::AddCFunction(const std::string &name, lua_CFunction cfunction) {
 	AddCFunction(name, cfunction, false);	
 }
 
-void LuaLibrary::AddCFunction(std::string name, lua_CFunction cfunction, bool replace) {
+void LuaLibrary::AddCFunction(const std::string &name, lua_CFunction cfunction, bool replace) {
 	if (!Exists(name) or replace) {
 		std::unique_ptr<LuaCFunction> func = std::make_unique<LuaCFunction>(cfunction);
 		func->setName(name);

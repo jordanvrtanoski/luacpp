@@ -30,43 +30,9 @@
 using namespace LuaCpp::Registry;
 using namespace LuaCpp::Engine;
 
-std::unique_ptr<LuaCodeSnippet> LuaCompiler::CompileString(std::string name, std::string code) {
-	std::unique_ptr<LuaCodeSnippet> cb_ptr = std::make_unique<LuaCodeSnippet>();
-
-	LuaState L;
-	int res = luaL_loadstring(L.getState(), code.c_str());
-	if (res != LUA_OK) {
-		switch (res) {
-			case LUA_ERRMEM:
-				throw std::runtime_error("Out of memory");
-				break;
-			case LUA_ERRGCMM:
-				throw std::out_of_range("GC Error while loading");
-				break;
-			case LUA_ERRSYNTAX:
-				throw std::logic_error(lua_tostring(L.getState(),1));
-				break;
-			default:
-				throw std::runtime_error(lua_tostring(L.getState(),1));
-		}
-	}
-	res = lua_dump(L.getState(), code_writer, (void*) cb_ptr.get(), 0);
-	
-	if (res != 0) {
-		throw std::runtime_error("Unable to store the compiled code in a LuaCodeSnippet");
-	}
-
-	cb_ptr->setName(name);
-	return cb_ptr;
-}
-
-std::unique_ptr<LuaCodeSnippet> LuaCompiler::CompileFile(std::string name, std::string fname) {
-	std::unique_ptr<LuaCodeSnippet> cb_ptr = std::make_unique<LuaCodeSnippet>();
-
-	LuaState L;
-	int res = luaL_loadfile(L, fname.c_str());
-	if (res != LUA_OK) {
-		switch (res) {
+void inline _checkErrorAndThrow(LuaState &L, int error) {
+	if (error != LUA_OK) {
+		switch (error) {
 			case LUA_ERRMEM:
 				throw std::runtime_error("Out of memory");
 				break;
@@ -77,13 +43,34 @@ std::unique_ptr<LuaCodeSnippet> LuaCompiler::CompileFile(std::string name, std::
 				throw std::logic_error(lua_tostring(L,1));
 				break;
 			default:
-				throw std::runtime_error(lua_tostring(L,1));
+				throw std::runtime_error("Unknown error code "+ std::to_string(error) + " :" +lua_tostring(L,1));
 		}
 	}
+}
+
+std::unique_ptr<LuaCodeSnippet> LuaCompiler::CompileString(std::string name, std::string code) {
+	std::unique_ptr<LuaCodeSnippet> cb_ptr = std::make_unique<LuaCodeSnippet>();
+
+	LuaState L;
+	int res = luaL_loadstring(L.getState(), code.c_str());
+	_checkErrorAndThrow(L, res);
+
+	res = lua_dump(L.getState(), code_writer, (void*) cb_ptr.get(), 0);
+	_checkErrorAndThrow(L, res);
+
+	cb_ptr->setName(name);
+	return cb_ptr;
+}
+
+std::unique_ptr<LuaCodeSnippet> LuaCompiler::CompileFile(std::string name, std::string fname) {
+	std::unique_ptr<LuaCodeSnippet> cb_ptr = std::make_unique<LuaCodeSnippet>();
+
+	LuaState L;
+	int res = luaL_loadfile(L, fname.c_str());
+	_checkErrorAndThrow(L, res);
+	
 	res = lua_dump(L, code_writer, (void*) cb_ptr.get(), 0);
-	if (res != 0) {
-		throw std::runtime_error("Unable to store the compiled code in a LuaCodeSnippet");
-	}
+	_checkErrorAndThrow(L, res);
 
 	cb_ptr->setName(name);
 	return cb_ptr;

@@ -30,6 +30,7 @@
 #include "Registry/LuaRegistry.hpp"
 #include "Registry/LuaLibrary.hpp"
 #include "Engine/LuaState.hpp"
+#include "Engine/LuaType.hpp"
 
 namespace LuaCpp {
 	/**
@@ -53,9 +54,29 @@ namespace LuaCpp {
 		 */
 		Registry::LuaRegistry registry;
 
+		/**
+		 * Custom `C` librraries for the session
+		 */
+		std::map<std::string, std::shared_ptr<Registry::LuaLibrary>> libraries;
 
-		std::map<std::string, Registry::LuaLibrary> libraries;
+		/**
+		 *
+		 */
+		std::map<std::string, std::shared_ptr<Engine::LuaType>> globalVariables;
+
 	public:
+
+		/**
+		 * @brief Constructs and empty context
+		 *
+		 * @details
+		 * Creates empty Lua cotext. This is the main entry point
+		 * for the communication with the Lua virtual machine
+		 * from the high level APIs.
+		 */
+		LuaContext() : registry(), libraries(), globalVariables() {};
+		~LuaContext() {};
+
 		/**
 		 * @brief Creates new Lua execution state from the context
 		 *
@@ -85,7 +106,7 @@ namespace LuaCpp {
 		 *
 		 * @return Pointer to the LuaState object holding the pointer of the lua_State
 		 */
-	        std::unique_ptr<Engine::LuaState> newStateFor(std::string name);
+	        std::unique_ptr<Engine::LuaState> newStateFor(const std::string &name);
 		
 		/**
 		 * @brief Compiles a string containing Lua code and adds it to the repository
@@ -99,7 +120,7 @@ namespace LuaCpp {
 		 * @param name Name under which the snippet is registered in the repository
 		 * @param code A valid Lua code that will be compiled
 		 */
-		void CompileString(std::string name, std::string code);
+		void CompileString(const std::string &name, const std::string &code);
 		
 		/**
 		 * @brief Compiles a string containing Lua code and adds it to the repository
@@ -114,7 +135,7 @@ namespace LuaCpp {
 		 * @param code A valid Lua code that will be compiled
 		 * @param recompile if true, the new version of the code will be active
 		 */
-		void CompileString(std::string name, std::string code, bool recompile);
+		void CompileString(const std::string &name, const std::string &code, bool recompile);
 
 		/**
 		 * @brief Compiles a fle containing Lua code and adds it to the registry
@@ -128,7 +149,7 @@ namespace LuaCpp {
 		 * @param name Name under which the snippet is registered in the registry
 		 * @param code path to the file where the code is stored
 		 */
-		void CompileFile(std::string name, std::string fname);
+		void CompileFile(const std::string &name, const std::string &fname);
 
 		/**
 		 * @brief Compiles a fle containing Lua code and adds it to the registry
@@ -143,7 +164,7 @@ namespace LuaCpp {
 		 * @param code path to the file where the code is stored
 		 * @param recompile if set to true, the new code will replace the old in the registry
 		 */
-		void CompileFile(std::string name, std::string fname, bool recompile);
+		void CompileFile(const std::string &name, const std::string &fname, bool recompile);
 
 		/**
 		 * @bried Compiles a code snippet and runs
@@ -160,7 +181,7 @@ namespace LuaCpp {
 		 *
 		 * @param code Code to run
 		 */
-		void CompileStringAndRun(std::string code);
+		void CompileStringAndRun(const std::string &code);
 
 		/**
 		 * @bried Compiles the file and runs
@@ -178,7 +199,7 @@ namespace LuaCpp {
 		 * @param code Code to run
 		 */
 		
-		void CompileFileAndRun(std::string code);
+		void CompileFileAndRun(const std::string &code);
 		/**
 		 * @bried Run a code snippet
 		 *
@@ -187,7 +208,7 @@ namespace LuaCpp {
 		 *
 		 * @param name Name under which the snippet is registered
 		 */
-		void Run(std::string name);
+		void Run(const std::string &name);
 
 		/**
 		* @brief Add a `C` library to the context
@@ -198,10 +219,25 @@ namespace LuaCpp {
 		*
 		* @param library The library containing `C` functions
 		*/
-		void AddLibrary(std::unique_ptr<Registry::LuaLibrary> library);
+		void AddLibrary(std::shared_ptr<Registry::LuaLibrary> &library);
 
-		LuaContext() : libraries() {};
-		~LuaContext() {};
+		/**
+		 * @brief Add a global variable
+		 *
+		 * @details
+		 * Add global variable. The variables will be populated in
+		 * the LuaState before the state is returned from the 
+		 * newState() and newStateFor() methods.
+		 *
+		 * The variables will be accessible from the lua enging
+		 * under the registered name.
+		 *
+		 * @param name name of the global variable
+		 * @param var the variable
+		 */
+		void AddGlobalVariable(const std::string &name, std::shared_ptr<Engine::LuaType> var);
+
+		std::shared_ptr<Engine::LuaType> &getGlobalVariable(const std::string &name);
 	};
 }
 

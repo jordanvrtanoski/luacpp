@@ -15,7 +15,7 @@ LuaCpp is a C++ library that wraps the `liblua` library and it's `C` API to prov
 Adding lua support can be as simple as adding few lines of code to the project. Following is the LuaCpp Hello World example
 
 ```c++
-#include "<LuaCpp.hpp>"
+#include <LuaCpp.hpp>
 #include <iostream>
 
 using namespace LuaCpp;
@@ -116,13 +116,6 @@ class MetaMap : public LuaMetaObject {
 			return !(values.find( name ) == values.end());
 		}
 
-		std::shared_ptr<LuaType> getValue(int key) {
-			if (Exists(std::to_string(key))) {
-				return values[std::to_string(key)];
-			}
-			return std::make_shared<LuaTNil>();
-		}
-
 		std::shared_ptr<LuaType> getValue(std::string &key) {
 			if (Exists(key)) {
 				return values[key];
@@ -130,29 +123,87 @@ class MetaMap : public LuaMetaObject {
 			return std::make_shared<LuaTNil>();
 		}
 
-		void setValue(int key, std::shared_ptr<LuaType> val) {
-			values[std::to_string(key)] = val;
-		}
-
 		void setValue(std::string &key, std::shared_ptr<LuaType> val) {
 			values[key] = val;
 		}
 
 };
-
 ```
 
 ## Adding Custom Libraries to lua engine
 
+LuaCpp allows you to register custom `C` functions as a library in the LuaContext. The libarary will
+be uploaded to the LuaState whenever a new state is instantiated (similar to the global variables). 
+Creating library will require understanding of the low-level lua and LuaCpp functions.
+
+The library can contin multiple functions that should be registred under different names. The names can not 
+overlap, however, the function call will receive all arguments that are passed from the lua invocation, so the
+function can implement different behaviours based on the number and type of the arguments. 
+
+Following is an example of a `C` library function which will sum the numerical arguments provided to the function:
+
+```c++
+#include <LuaCpp.hpp>
+#include <iostream>
+#include <stdexcept>
+
+using namespace LuaCpp;
+using namespace LuaCpp::Registry;
+using namespace LuaCpp::Engine;
+
+extern "C" {
+   static int _sum (lua_State *L) {
+     int n = lua_gettop(L);    /* number of arguments */
+     lua_Number sum = 0.0;
+     int i;
+     for (i = 1; i <= n; i++) {
+       if (!lua_isnumber(L, i)) {
+         lua_pushliteral(L, "incorrect argument");
+         lua_error(L);
+       }
+       sum += lua_tonumber(L, i);
+     }
+     lua_pushnumber(L, sum);         /* second result */
+     return 1;                   /* number of results */
+   }
+}
+
+int main(int argc, char **argv) {
+
+	// Creage Lua context
+	LuaContext lua;
+
+	// Create library "foo" conatining the "foo" function
+	std::shared_ptr<LuaLibrary> lib = std::make_shared<LuaLibrary>("foolib");
+	lib->AddCFunction("sum", _sum);
+
+	// Add library to the context
+	lua.AddLibrary(lib);
+
+	// Run the context	
+	try {
+		lua.CompileStringAndRun("print(\"Result of calling foolib.sum(1,2,3,4) = \" .. foolib.sum(1,2,3,4))");
+	}
+	catch (std::runtime_error& e)
+  	{
+		std::cout << e.what() << '\n';
+  	}
+}
+```
+
 
 ## Installing
+
+Clone the project and from the root of the project, invoke:
 
 ```
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Debug ../Source
+cmake ../Source
 make -j 4
+make install
 ```
+
 
 ## Building documents
 
@@ -161,11 +212,9 @@ sudo apt-get install texlive-latex-base texlive-latex-recommended texlive-latex-
 
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Debug ../Source
-make doc_doxygen
+cmake ../Source
+make doc_pdf
 
-cd build/doc_doxygen/latex
-make pdf
 ```
 
 ## Testing the memory management
@@ -179,7 +228,7 @@ make -j 4
 valgrind -v --run-cxx-freeres=yes --run-libc-freeres=yes ./hello
 ```
 
-## Running the unit test
+## Running the unit test and debugging
 
 ```
 mkdir build

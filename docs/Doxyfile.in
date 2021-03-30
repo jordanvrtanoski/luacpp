@@ -6,5 +6,10 @@ EXTRACT_ALL            = YES
 UML_LOOK               = YES
 RECURSIVE              = YES
 OUTPUT_DIRECTORY       = @PROJECT_BINARY_DIR@/doc_doxygen/
-INPUT                  = @PROJECT_SOURCE_DIR@/../Source/ @PROJECT_SOURCE_DIR@/../docs
+INPUT                  = @PROJECT_SOURCE_DIR@/../Source/ @PROJECT_SOURCE_DIR@/../docs 
 EXAMPLE_PATH           = @PROJECT_SOURCE_DIR@/../Source/Example
+
+EXCLUDE_PATTERNS       = */CODE_OF_CONDUCT.md
+EXCLUDE_PATTERNS      += */CONTRIBUTING.md
+EXCLUDE_PATTERNS      += */pull_request_template.md
+EXCLUDE_PATTERNS      += */UnitTest/*

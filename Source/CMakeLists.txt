@@ -126,6 +126,7 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
 
     find_program (gcovr gcovr)
+    find_program (lcov lcov)
 
     if (gcovr)
 	message (STATUS "Found command 'gcovr' => Use target 'coverage-html' or 'coverage-cli' to generate coverage report '${CMAKE_BINARY_DIR}/gcovr.html'")
@@ -172,9 +173,27 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
 			     --exclude-throw-branches
          ) 
     else()
-         message(FATAL_ERROR "Cannot find command 'gcovr' => Please install package 'gcovr' to generate code coverage report (HTML)")
+	 message(FATAL_ERROR "Cannot find command 'gcovr' => Please install package 'gcovr' to generate code coverage report (JSON, CLI, HTML)")
     endif()
 
+    if(lcov)
+	add_custom_target (coverage-lcov
+	    COMMAND make test
+	    COMMAND echo "======= ${PROJECT_DIR} =============="
+            COMMAND ${lcov}  --capture
+	                     --directory        ${CMAKE_BINARY_DIR}
+			     --base-directory   ${CMAKE_SOURCE_DIR}
+                             --output-file      ${CMAKE_BINARY_DIR}/coverage.info
+			     --rc               lcov_branch_coverage=1
+            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '/usr/include/*' 
+	                     --output ${CMAKE_BINARY_DIR}/coverage.info
+            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '*/build/googletest-install/*' 
+	                     --output ${CMAKE_BINARY_DIR}/coverage.info
+            COMMAND ${lcov}  --list   ${CMAKE_BINARY_DIR}/coverage.info 
+         ) 
+    else()
+	    message(WARNING "Cannot find command 'lcov' => Please install package 'lcov' to generate code coverage report (Coveralls)")
+    endif()
 endif()
 
 ###########

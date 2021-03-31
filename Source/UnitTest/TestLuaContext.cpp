@@ -73,6 +73,10 @@ namespace LuaCpp {
 			of.open("TestLuaContext_3_v3.lua", std::ofstream::out | std::ofstream::trunc );
 			of << "print('Hello World from Lua, v3.0')";
 			of.close();
+
+			of.open("TestLuaContext_4_se.lua", std::ofstream::out | std::ofstream::trunc );
+			of << "while {}[1]";
+			of.close();
 		}
 	};
 
@@ -129,6 +133,48 @@ namespace LuaCpp {
 
 		EXPECT_THROW(ctx.CompileString("test", "while {}[1]"), std::logic_error) ;
 	}
+
+	TEST_F(TestLuaContext, CompileFolderWithPrefixNoRecompile) {
+		LuaContext ctx;
+			
+		EXPECT_NO_THROW(ctx.CompileFolder("./", "local", false));
+
+		EXPECT_NO_THROW(ctx.newStateFor("local.TestLuaContext_3_v3"));
+
+		EXPECT_THROW(ctx.newStateFor("local.TestLuaContext_4_se"), std::runtime_error);
+	}
+
+	TEST_F(TestLuaContext, CompileFolderNoPrefixNoRecompile) {
+		LuaContext ctx;
+			
+		EXPECT_NO_THROW(ctx.CompileFolder("./", "", false));
+
+		EXPECT_NO_THROW(ctx.newStateFor("TestLuaContext_3_v3"));
+
+		EXPECT_THROW(ctx.newStateFor("TestLuaContext_4_se"), std::runtime_error);
+	}
+
+	TEST_F(TestLuaContext, CompileFolderWithPrefix) {
+		LuaContext ctx;
+			
+		EXPECT_NO_THROW(ctx.CompileFolder("./", "local"));
+
+		EXPECT_NO_THROW(ctx.newStateFor("local.TestLuaContext_3_v3"));
+
+		EXPECT_THROW(ctx.newStateFor("local.TestLuaContext_4_se"), std::runtime_error);
+	}
+
+	TEST_F(TestLuaContext, CompileFolder) {
+		LuaContext ctx;
+			
+		EXPECT_NO_THROW(ctx.CompileFolder("./"));
+
+		EXPECT_NO_THROW(ctx.newStateFor("TestLuaContext_3_v3"));
+
+		EXPECT_THROW(ctx.newStateFor("TestLuaContext_4_se"), std::runtime_error);
+	}
+
+
 
 	TEST_F(TestLuaContext, HelloWorldFromLuaString) {
 		/**

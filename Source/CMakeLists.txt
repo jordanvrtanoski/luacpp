@@ -40,16 +40,16 @@ target_link_libraries(luacpp_static ${LUA_LIBRARIES})
 ##########
 # Examples
 ##########
-add_executable(hello Example/example_helloworld.cpp)
-target_link_libraries(hello luacpp_static)
+add_executable(example_helloworld Example/example_helloworld.cpp)
+target_link_libraries(example_helloworld luacpp)
 
-add_executable(test_lualib Example/example_LuaLibrary.cpp)
-target_link_libraries(test_lualib luacpp_static)
+add_executable(example_LuaLibrary Example/example_LuaLibrary.cpp)
+target_link_libraries(example_LuaLibrary luacpp)
 
-add_executable(test_metaobj Example/example_LuaMetaObject.cpp)
-target_link_libraries(test_metaobj luacpp_static)
+add_executable(example_LuaMetaObject Example/example_LuaMetaObject.cpp)
+target_link_libraries(example_LuaMetaObject luacpp)
 
-add_custom_command(TARGET hello POST_BUILD
+add_custom_command(TARGET example_helloworld POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Example/hello.lua ${PROJECT_BINARY_DIR}/hello.lua
 	COMMENT "${PROJECT_BINARY_DIR}/hello.lua copied to build" 
 )

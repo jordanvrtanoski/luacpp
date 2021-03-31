@@ -22,9 +22,11 @@
    SOFTWARE.
    */
 
-#include "LuaContext.hpp"
 #include <stdexcept>
 #include <iostream>
+#include <filesystem>
+
+#include "LuaContext.hpp"
 
 using namespace LuaCpp;
 using namespace LuaCpp::Engine;
@@ -67,6 +69,32 @@ void LuaContext::CompileFile(const std::string &name, const std::string &fname) 
 
 void LuaContext::CompileFile(const std::string &name, const std::string &fname, bool recompile) {
 	registry.CompileAndAddFile(name,fname, recompile);
+}
+
+void LuaContext::CompileFolder(const std::string &path) {
+	CompileFolder(path, "", false);
+}
+
+void LuaContext::CompileFolder(const std::string &path, const std::string &prefix) {
+	CompileFolder(path, prefix, false);
+}
+
+void LuaContext::CompileFolder(const std::string &path, const std::string &prefix, bool recompile) {
+	for (const auto &entry : std::filesystem::directory_iterator(path)) {
+		if (entry.is_regular_file()){
+			std::filesystem::path path = entry.path();
+			if (path.extension() == ".lua") {
+				try {
+					if (prefix == "") {
+						CompileFile(path.stem().native() ,path, recompile);
+					} else {
+						CompileFile(prefix+"."+path.stem().native() ,path, recompile);
+					}
+				} catch (std::logic_error &e) {
+				}
+			}
+		}
+	}
 }
 
 void LuaContext::CompileStringAndRun(const std::string &code) {

@@ -166,6 +166,13 @@ namespace LuaCpp {
 		 */
 		void CompileFile(const std::string &name, const std::string &fname, bool recompile);
 
+
+		void CompileFolder(const std::string &path);
+
+		void CompileFolder(const std::string &path, const std::string &prfix);
+		
+		void CompileFolder(const std::string &path, const std::string &prefix, bool recompile);
+		
 		/**
 		 * @bried Compiles a code snippet and runs
 		 *

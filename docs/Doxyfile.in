@@ -1,15 +1,27 @@
 PROJECT_NAME           = LuaCpp
 PROJECT_NUMBER         = 0.0.1
 PROJECT_BRIEF          = C++ wrapper for Lua library
+
 OPTIMIZE_OUTPUT_FOR_C  = YES
 EXTRACT_ALL            = YES
 UML_LOOK               = YES
 RECURSIVE              = YES
+FULL_PATH_NAMES        = NO
+
+CALLER_GRAPH           = YES
+CALL_GRAPH             = YES
+COLLABORATION_GRAPH    = YES
+
+GENERATE_SQLITE3       = YES
+SQLITE3_RECREATE_DB    = YES
+
 OUTPUT_DIRECTORY       = @PROJECT_BINARY_DIR@/doc_doxygen/
 INPUT                  = @PROJECT_SOURCE_DIR@/../Source/ @PROJECT_SOURCE_DIR@/../docs 
 EXAMPLE_PATH           = @PROJECT_SOURCE_DIR@/../Source/Example
 
 EXCLUDE_PATTERNS       = */CODE_OF_CONDUCT.md
 EXCLUDE_PATTERNS      += */CONTRIBUTING.md
+EXCLUDE_PATTERNS      += */Example/*
 EXCLUDE_PATTERNS      += */pull_request_template.md
 EXCLUDE_PATTERNS      += */UnitTest/*
+EXCLUDE_PATTERNS      += */CMakeLists.txt

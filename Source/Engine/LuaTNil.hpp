@@ -32,17 +32,79 @@
 
 namespace LuaCpp {
 	namespace Engine {
+		/**
+		 * @brief Implementation of the LUA_TNIL type
+		 *
+		 * @details
+		 * Implmenetation of the `nil` type of lua engine.
+		 * The class is inheriting from `LuaType`
+		 */
 		class LuaTNil : public LuaType {
 		   public:
+			/**
+			 * @bried Default constructor
+			 *
+			 * @details
+			 * Default constructor for the class
+			 */
 			LuaTNil() : LuaType() {}
-			~LuaTNil() {}
 
+			/**
+			 * @brief Default destructor
+			 *
+			 * @details
+			 * Default destructor for the class
+			 */
+			~LuaTNil() {}
+			
+			/**
+			 * @brief Returns the type id as deifend in the `lua.h`
+			 *
+			 * @detail
+			 * Returns the lua type id for the nil type: `LUA_TNIL`
+			 *
+			 * @see LuaType.getTypeId()
+			 */
 			int getTypeId();
+
+			/**
+			 * @brief Returns the string representation of the type
+			 *
+			 * @details
+			 * Returns the string interpretation of the nil type.
+			 *
+			 * @see LuaType.getTypeName()
+			 *
+			 */
 			std::string getTypeName(LuaState &L);
+
+			/**
+			 * @brief Pushes a LUA_TNIL on the top fo the stack
+			 *
+			 * @details
+			 * Pushes a LUA_TNIL on top of the stack
+			 *
+			 * @see LuaType.PushValue()
+			 */
 			void PushValue(LuaState &L);
 
+			/**
+			 * @brief Reads the value from the stack
+			 *
+			 * @details
+			 * Reads a vlue from the stack. The method will check if the stack
+			 * on the index has the LUA_TNIL type, and if not will throw an error.
+			 *
+			 * @see LuaType.PopValue()
+			 */
 			using LuaType::PopValue;
 			void PopValue(LuaState &L, int idx);
+
+			/**
+			 * @brief Returns string with `nil`
+			 *
+			 * @see LuaType.ToString()
+			 */
 			std::string ToString();
 		};
 	}

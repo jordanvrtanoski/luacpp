@@ -27,6 +27,7 @@
 #include <filesystem>
 
 #include "LuaContext.hpp"
+#include "LuaVersion.hpp"
 
 using namespace LuaCpp;
 using namespace LuaCpp::Engine;
@@ -42,6 +43,9 @@ std::unique_ptr<LuaState> LuaContext::newState() {
 	for(const auto &var : globalVariables) {
 		((std::shared_ptr<LuaType>) var.second)->PushGlobal(*L, var.first);
 	}
+	lua_pushstring(*L, std::string(LuaCpp::Version).c_str());
+	lua_setglobal(*L, "_luacppversion");
+
 	return L;
 }
 

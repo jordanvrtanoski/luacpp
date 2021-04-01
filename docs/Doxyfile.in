@@ -1,5 +1,5 @@
 PROJECT_NAME           = LuaCpp
-PROJECT_NUMBER         = 0.0.1
+PROJECT_NUMBER         = 0.1.0
 PROJECT_BRIEF          = C++ wrapper for Lua library
 
 OPTIMIZE_OUTPUT_FOR_C  = YES

@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 # Source files
 set(SOURCE_FILES
 	Lua.hpp
-	LuaCpp.cpp LuaCpp.hpp
+	LuaCpp.hpp
+	LuaVersion.cpp LuaVersion.hpp
 	Engine/LuaState.cpp Engine/LuaState.hpp
 	Engine/LuaType.cpp Engine/LuaType.hpp
 	Engine/LuaTNil.cpp Engine/LuaTNil.hpp

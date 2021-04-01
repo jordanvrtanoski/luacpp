@@ -192,6 +192,23 @@ namespace LuaCpp {
 
 	}
 
+	TEST_F(TestLuaContext, CheckLuaCppVersionInLuaContext) {
+		/**
+		 * The snippet should print the version message on the screen.
+		 */
+		LuaContext ctx;
+
+		testing::internal::CaptureStdout();
+
+		EXPECT_NO_THROW(ctx.CompileStringAndRun("print(_luacppversion)"));
+
+		std::string output = testing::internal::GetCapturedStdout();
+
+		EXPECT_EQ(std::string(LuaCpp::Version)+"\n", output);
+
+	}
+
+
 	TEST_F(TestLuaContext, RuntimeErrorFromLuaString) {
 		/**
 		 * The code is syntacticaly correct, but contains call to unexiting function.

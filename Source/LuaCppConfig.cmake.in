@@ -1,0 +1,11 @@
+set(LuaCpp_VERSION 0.1.0)
+...
+@PACKAGE_INIT@
+...
+
+set_and_check(LuaCpp_INCLUDE_DIR "@PACKAGE_LuaCpp_INCLUDE_DIR@")
+set_and_check(LuaCpp_INSTALL_LIBDIR "@PACKAGE_LuaCpp_INSTALL_LIBDIR@")
+
+find_package(Lua REQUIRED)
+
+check_required_components(LuaCpp)

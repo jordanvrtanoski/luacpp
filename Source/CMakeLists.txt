@@ -58,19 +58,43 @@ add_custom_command(TARGET example_helloworld POST_BUILD
 #########
 # Install
 #########
+include(CMakePackageConfigHelpers)
+
+set(LuaCpp_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/LuaCpp")
+set(LuaCpp_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+
 install(TARGETS luacpp
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(TARGETS luacpp_static
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES LuaCpp.hpp DESTINATION "include/LuaCpp")
-install(DIRECTORY ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/Registry ${CMAKE_SOURCE_DIR}/Engine
-	DESTINATION "include/LuaCpp"
+install(FILES LuaCpp.hpp Lua.hpp LuaContext.hpp LuaMetaObject.hpp LuaVersion.hpp 
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/LuaCpp")
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/Registry ${CMAKE_SOURCE_DIR}/Engine
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/LuaCpp"
         FILES_MATCHING
         PATTERN "*.hpp"
 )
-
+configure_package_config_file(
+	LuaCppConfig.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfig.cmake
+	INSTALL_DESTINATION "${CMAKE_CONFIG_DEST}/LuaCpp/cmake"
+	PATH_VARS
+		LuaCpp_INCLUDE_DIR
+		LuaCpp_INSTALL_LIBDIR
+)
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfigVersion.cmake
+  	VERSION 0.1.0
+  	COMPATIBILITY SameMajorVersion
+	ARCH_INDEPENDENT
+)
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfigVersion.cmake
+	DESTINATION ${CMAKE_CONFIG_DEST}/LuaCpp/cmake
+)
 
 #########
 # Testing

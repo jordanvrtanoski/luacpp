@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(luacpp)
+project(LuaCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -60,7 +60,8 @@ add_custom_command(TARGET example_helloworld POST_BUILD
 #########
 include(CMakePackageConfigHelpers)
 
-set(LuaCpp_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/LuaCpp")
+set(CMAKE_CONFIG_DEST "${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/cmake")
+set(LuaCpp_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
 set(LuaCpp_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
 
 install(TARGETS luacpp
@@ -70,17 +71,17 @@ install(TARGETS luacpp_static
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES LuaCpp.hpp Lua.hpp LuaContext.hpp LuaMetaObject.hpp LuaVersion.hpp 
-	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/LuaCpp")
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/Registry ${CMAKE_SOURCE_DIR}/Engine
-	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/LuaCpp"
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
         FILES_MATCHING
         PATTERN "*.hpp"
 )
 configure_package_config_file(
 	LuaCppConfig.cmake.in
 	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfig.cmake
-	INSTALL_DESTINATION "${CMAKE_CONFIG_DEST}/LuaCpp/cmake"
+	INSTALL_DESTINATION "${CMAKE_CONFIG_DEST}"
 	PATH_VARS
 		LuaCpp_INCLUDE_DIR
 		LuaCpp_INSTALL_LIBDIR
@@ -93,8 +94,14 @@ write_basic_package_version_file(
 )
 install(FILES
 	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfigVersion.cmake
-	DESTINATION ${CMAKE_CONFIG_DEST}/LuaCpp/cmake
+	${CMAKE_CURRENT_BINARY_DIR}/LuaCppConfig.cmake
+	DESTINATION ${CMAKE_CONFIG_DEST}
 )
+
+export(TARGETS luacpp luacpp_static
+	FILE "${CMAKE_CURRENT_BINARY_DIR}/LuaCppTargets.cmake"
+)
+export(PACKAGE ${PROJECT_NAME})
 
 #########
 # Testing

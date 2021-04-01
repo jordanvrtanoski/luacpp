@@ -14,7 +14,7 @@ LuaCpp is a C++ library that wraps the `liblua` library and it's `C` API to prov
 
 Adding lua support can be as simple as adding few lines of code to the project. Following is the LuaCpp Hello World example
 
-**hello.c**
+**hello.cpp**
 ```c++
 #include <LuaCpp.hpp>
 #include <iostream>
@@ -46,6 +46,25 @@ Compile the code with
 Hi from C++, this is a demo how LuaCpp can be used
 The fastest way to start using lua in a project
 ```
+
+or, compile the code with a `cmake`
+
+**CMakeLists.txt**
+```
+cmake_minimum_required(VERSION 3.9)
+project(HelloLuaCpp)
+
+set(CMAKE_CXX_STANDARD 17)
+
+include(GNUInstallDirs)
+
+find_package(LuaCpp REQUIRED)
+
+add_executable(example hello.cpp)
+target_include_directories(example PRIVATE ${LUACPP_INCLUDE_DIR})
+target_link_libraries(example ${LUACPP_LIBRARIES})
+```
+
 To have the information about the `C++` classes and utility functions, make the `doc_pdf` target which
 generates the full reference and user manual.
 
@@ -222,7 +241,6 @@ mkdir build
 cd build
 cmake ../Source
 make doc_pdf
-
 ```
 
 ## Testing the memory management

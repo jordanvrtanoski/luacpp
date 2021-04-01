@@ -111,6 +111,22 @@ add_dependencies(testLuaMetaObject googletest)
 target_link_libraries(testLuaMetaObject luacpp_static gtest_main gtest pthread)
 gtest_discover_tests(testLuaMetaObject)
 
+
+#############
+# Memory Test
+#############
+find_program(valgrind valgrind)
+
+if (valgrind)
+	message(STATUS "Found command 'valgrand' => Use target 'test_memory' to perform memory test")
+	add_custom_target( test_memory
+		COMMAND valgrind -v --run-cxx-freeres=yes --run-libc-freeres=yes make test 
+	)
+else()
+	message(WARNING "Cannot find command 'valgrand' => Please install package 'valgrand' to run memory tests")
+endif()
+
+
 ##########
 # Coverage
 ##########

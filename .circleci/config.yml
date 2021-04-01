@@ -27,9 +27,22 @@ jobs:
          verbose: true
          path_to_lcov: build/coverage.info
 
+  memory:
+    executor: c-build-env
+    steps:
+      - run: DEBIAN_FRONTEND=noninteractive apt update
+      - run: DEBIAN_FRONTEND=noninteractive apt install -y build-essential liblua5.3-dev lua5.3 git cmake valgrind lcov npm texlive-latex-base texlive-latex-recommended texlive-latex-extra graphviz gcovr
+      - run: rm -rf luacpp
+      - checkout
+      - run: pwd && ls -ltr
+      - run: mkdir debug
+      - run: cd debug && cmake -DCMAKE_BUILD_TYPE=Debug ../Source && make -j4
+      - run: cd debug && make test_memory
+      
 workflows:
   # Name the workflow "welcome"
-  welcome:
+  build:
     # Run the welcome/run job in its own container
     jobs:
       - coverage
+      - memory

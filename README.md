@@ -223,9 +223,9 @@ make doc_pdf
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Debug ../Source
-make -j 4
 
-valgrind -v --run-cxx-freeres=yes --run-libc-freeres=yes ./hello
+make -j 4
+make test_memory
 ```
 
 ## Running the unit test and debugging

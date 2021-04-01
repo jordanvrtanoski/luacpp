@@ -1,0 +1,20 @@
+set(LuaCpp_VERSION 0.1.0)
+
+#
+# Provides the following configuration variables
+#    LUACPP_INCLUDE_DIR  -> Containing the LuaCpp and Lua include folders
+#    LUACPP_LIBRARIES    -> The shared libraries for LuaCpp na Lua
+#
+
+
+@PACKAGE_INIT@
+
+set_and_check(LuaCpp_INCLUDE_DIR "@PACKAGE_LuaCpp_INCLUDE_DIR@")
+set_and_check(LuaCpp_INSTALL_LIBDIR "@PACKAGE_LuaCpp_INSTALL_LIBDIR@")
+
+find_package(Lua REQUIRED)
+
+set(LUACPP_INCLUDE_DIR "${LuaCpp_INCLUDE_DIR};${LUA_INCLUDE_DIR}")
+set(LUACPP_LIBRARIES "${LuaCpp_INSTALL_LIBDIR}/libluacpp.so;${LUA_LIBRARIES}")
+
+check_required_components(LuaCpp)

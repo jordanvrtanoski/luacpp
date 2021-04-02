@@ -424,4 +424,26 @@ namespace LuaCpp {
 
 	}
 
+	TEST_F(TestLuaContext, TestEnvironmentVariables) {
+		LuaContext ctx;
+
+		std::shared_ptr<Engine::LuaTString> str = std::make_shared<Engine::LuaTString>("testing 1,2,3");
+		LuaEnvironment env;
+
+		env["test_str"] = str;
+
+		testing::internal::CaptureStdout();
+
+		EXPECT_NO_THROW(ctx.CompileString("test", "print(test_str) test_str = 'changed'"));
+		
+		EXPECT_NO_THROW(ctx.RunWithEnvironment("test", env));
+		
+		std::string output = testing::internal::GetCapturedStdout();
+	
+		EXPECT_EQ("testing 1,2,3\n", output);
+		EXPECT_EQ("changed", str->getValue());
+		EXPECT_EQ((void *) NULL, (void *) &(*ctx.getGlobalVariable("test_str")));
+
+	}
+
 }

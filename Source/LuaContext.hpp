@@ -41,6 +41,9 @@ namespace LuaCpp {
 	 * which holds the compiled code snippets and global variables
 	 *
 	 */
+
+	typedef std::map<std::string, std::shared_ptr<Engine::LuaType>> LuaEnvironment;
+
 	class LuaContext {
 		/**
 		 * @brief Name of the context
@@ -62,7 +65,7 @@ namespace LuaCpp {
 		/**
 		 *
 		 */
-		std::map<std::string, std::shared_ptr<Engine::LuaType>> globalVariables;
+		LuaEnvironment globalEnvironment;
 
 	public:
 
@@ -74,7 +77,7 @@ namespace LuaCpp {
 		 * for the communication with the Lua virtual machine
 		 * from the high level APIs.
 		 */
-		LuaContext() : registry(), libraries(), globalVariables() {};
+		LuaContext() : registry(), libraries(), globalEnvironment() {};
 		~LuaContext() {};
 
 		/**
@@ -85,9 +88,26 @@ namespace LuaCpp {
 		 * state will be loaded with the standard libraries 
 		 * and the libraries that are registered in the context
 		 *
+		 * The globalEnvironment variables will also be loaded to the context.
+		 *
 		 * @return Pointer to the LuaState object holding the pointer of the lua_State
 		 */
 		std::unique_ptr<Engine::LuaState> newState();
+
+		/**
+		 * @brief Creates new Lua execution state from the context
+		 *
+		 * @details
+		 * Creates new Lua execution state from the context. The
+		 * state will be loaded with the standard libraries 
+		 * and the libraries that are registered in the context
+		 *
+		 * The provided environment will be loaded instead of the 
+		 * global environment.
+		 *
+		 * @return Pointer to the LuaState object holding the pointer of the lua_State
+		 */
+		std::unique_ptr<Engine::LuaState> newState(const LuaEnvironment &env);
 
 		/**
 		 * @brief Creates new Lua execution state from the context and loads a snippet
@@ -100,6 +120,9 @@ namespace LuaCpp {
 		 * The snippet will be on top of the lua stack (position 1) and is ready
 		 * for execution, or definition of a global name
 		 *
+		 * The variables defined in the globalEnvironment will be loaded on the
+		 * state.
+		 *
 		 * If the name is not found, the method will throw exception
 		 *
 		 * @param name Name of the snippet to be loaded
@@ -108,6 +131,28 @@ namespace LuaCpp {
 		 */
 	        std::unique_ptr<Engine::LuaState> newStateFor(const std::string &name);
 		
+		/**
+		 * @brief Creates new Lua execution state from the context and loads a snippet
+		 *
+		 * @details
+		 * Creates new Lua execution state from the context. The
+		 * state will be loaded with the standard libraries 
+		 * and the libraries that are registered in the context. In addition to the
+		 * libraries, the context will be loaded with the selected snippet.
+		 * The snippet will be on top of the lua stack (position 1) and is ready
+		 * for execution, or definition of a global name
+		 *
+		 * The varibles provided with the `LuaEnvironment` will also be loaded on
+		 * the state as a global variables.
+		 *
+		 * If the name is not found, the method will throw exception
+		 *
+		 * @param name Name of the snippet to be loaded
+		 *
+		 * @return Pointer to the LuaState object holding the pointer of the lua_State
+		 */
+	        std::unique_ptr<Engine::LuaState> newStateFor(const std::string &name, const LuaEnvironment &env);
+
 		/**
 		 * @brief Compiles a string containing Lua code and adds it to the repository
 		 *
@@ -300,8 +345,8 @@ namespace LuaCpp {
 		 *
 		 * @param code Code to run
 		 */
-		
 		void CompileFileAndRun(const std::string &code);
+		
 		/**
 		 * @bried Run a code snippet
 		 *
@@ -311,6 +356,17 @@ namespace LuaCpp {
 		 * @param name Name under which the snippet is registered
 		 */
 		void Run(const std::string &name);
+
+		/**
+		 * @bried Run a code snippet with a given `lua` global table
+		 *
+		 * @details
+		 * Run a snippet that was previously compiled and stored in the registry
+		 * with a given environment (lua global variables)
+		 *
+		 * @param name Name under which the snippet is registered
+		 */
+		void RunWithEnvironment(const std::string &name, const LuaEnvironment &env);
 
 		/**
 		* @brief Add a `C` library to the context

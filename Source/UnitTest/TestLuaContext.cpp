@@ -73,6 +73,10 @@ namespace LuaCpp {
 			of.open("TestLuaContext_3_v3.lua", std::ofstream::out | std::ofstream::trunc );
 			of << "print('Hello World from Lua, v3.0')";
 			of.close();
+
+			of.open("TestLuaContext_4_se.lua", std::ofstream::out | std::ofstream::trunc );
+			of << "while {}[1]";
+			of.close();
 		}
 	};
 
@@ -130,6 +134,48 @@ namespace LuaCpp {
 		EXPECT_THROW(ctx.CompileString("test", "while {}[1]"), std::logic_error) ;
 	}
 
+	TEST_F(TestLuaContext, CompileFolderWithPrefixNoRecompile) {
+		LuaContext ctx;
+			
+		EXPECT_NO_THROW(ctx.CompileFolder("./", "local", false));
+
+		EXPECT_NO_THROW(ctx.newStateFor("local.TestLuaContext_3_v3"));
+
+		EXPECT_THROW(ctx.newStateFor("local.TestLuaContext_4_se"), std::runtime_error);
+	}
+
+	TEST_F(TestLuaContext, CompileFolderNoPrefixNoRecompile) {
+		LuaContext ctx;
+			
+		EXPECT_NO_THROW(ctx.CompileFolder("./", "", false));
+
+		EXPECT_NO_THROW(ctx.newStateFor("TestLuaContext_3_v3"));
+
+		EXPECT_THROW(ctx.newStateFor("TestLuaContext_4_se"), std::runtime_error);
+	}
+
+	TEST_F(TestLuaContext, CompileFolderWithPrefix) {
+		LuaContext ctx;
+			
+		EXPECT_NO_THROW(ctx.CompileFolder("./", "local"));
+
+		EXPECT_NO_THROW(ctx.newStateFor("local.TestLuaContext_3_v3"));
+
+		EXPECT_THROW(ctx.newStateFor("local.TestLuaContext_4_se"), std::runtime_error);
+	}
+
+	TEST_F(TestLuaContext, CompileFolder) {
+		LuaContext ctx;
+			
+		EXPECT_NO_THROW(ctx.CompileFolder("./"));
+
+		EXPECT_NO_THROW(ctx.newStateFor("TestLuaContext_3_v3"));
+
+		EXPECT_THROW(ctx.newStateFor("TestLuaContext_4_se"), std::runtime_error);
+	}
+
+
+
 	TEST_F(TestLuaContext, HelloWorldFromLuaString) {
 		/**
 		 * The snippet should print "Hello World from Lua" message on the screen.
@@ -145,6 +191,23 @@ namespace LuaCpp {
 		EXPECT_EQ("Hello World from Lua\n", output);
 
 	}
+
+	TEST_F(TestLuaContext, CheckLuaCppVersionInLuaContext) {
+		/**
+		 * The snippet should print the version message on the screen.
+		 */
+		LuaContext ctx;
+
+		testing::internal::CaptureStdout();
+
+		EXPECT_NO_THROW(ctx.CompileStringAndRun("print(_luacppversion)"));
+
+		std::string output = testing::internal::GetCapturedStdout();
+
+		EXPECT_EQ(std::string(LuaCpp::Version)+"\n", output);
+
+	}
+
 
 	TEST_F(TestLuaContext, RuntimeErrorFromLuaString) {
 		/**
@@ -358,6 +421,28 @@ namespace LuaCpp {
 		std::shared_ptr<Engine::LuaTString> str2 = std::static_pointer_cast<Engine::LuaTString>(ctx.getGlobalVariable("test_str"));
 		EXPECT_EQ("changed", str2->getValue());
 
+
+	}
+
+	TEST_F(TestLuaContext, TestEnvironmentVariables) {
+		LuaContext ctx;
+
+		std::shared_ptr<Engine::LuaTString> str = std::make_shared<Engine::LuaTString>("testing 1,2,3");
+		LuaEnvironment env;
+
+		env["test_str"] = str;
+
+		testing::internal::CaptureStdout();
+
+		EXPECT_NO_THROW(ctx.CompileString("test", "print(test_str) test_str = 'changed'"));
+		
+		EXPECT_NO_THROW(ctx.RunWithEnvironment("test", env));
+		
+		std::string output = testing::internal::GetCapturedStdout();
+	
+		EXPECT_EQ("testing 1,2,3\n", output);
+		EXPECT_EQ("changed", str->getValue());
+		EXPECT_EQ((void *) NULL, (void *) &(*ctx.getGlobalVariable("test_str")));
 
 	}
 

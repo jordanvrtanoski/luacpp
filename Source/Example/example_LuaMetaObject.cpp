@@ -30,18 +30,40 @@ using namespace LuaCpp;
 using namespace LuaCpp::Registry;
 using namespace LuaCpp::Engine;
 
+
+class MetaMap : public LuaMetaObject {
+	public:
+	        std::map<std::string, std::shared_ptr<LuaType>> values;
+		MetaMap() : values() {}
+		bool inline Exists(const std::string &name) {
+			return !(values.find( name ) == values.end());
+		}
+
+		std::shared_ptr<LuaType> getValue(std::string &key) {
+			if (Exists(key)) {
+				return values[key];
+			}
+			return std::make_shared<LuaTNil>();
+		}
+
+		void setValue(std::string &key, std::shared_ptr<LuaType> val) {
+			values[key] = val;
+		}
+
+};
+
+
 int main(int argc, char **argv) {
 
 	// Creage Lua context
 	LuaContext lua;
 
-	lua.CompileString("test1", "print('Calling foo as a metafunction of a usertype ' .. foo[1] .. foo[\"key\"])");
-	lua.CompileString("test2", "print('Assigning to foo ') foo[1] = 'test'");
-	lua.CompileString("test3", "print('Calling the foo ') foo(1,\"foo\")");
+	lua.CompileString("test1", "print('Assigning to foo[\"1\"] value \"testing MetaMap\"') foo[\"1\"] = 'testing MetaMap'");
+	lua.CompileString("test2", "print('foo[\"1\"] : ' .. foo[\"1\"] )");
 	
 	std::unique_ptr<LuaState> L = lua.newStateFor("test1");
 
-	LuaMetaObject obj;
+	MetaMap obj;
 	
 	obj.PushGlobal(*L, "foo");
 
@@ -58,11 +80,4 @@ int main(int argc, char **argv) {
 		std::cout << "Error Executing " << res << " " << lua_tostring(*L,1) << "\n";	
 	}
 
-	L = lua.newStateFor("test3");
-	obj.PushGlobal(*L, "foo");
-
-	res = lua_pcall(*L, 0, LUA_MULTRET, 0);
-	if (res != LUA_OK ) {
-		std::cout << "Error Executing " << res << " " << lua_tostring(*L,1) << "\n";	
-	}
 }

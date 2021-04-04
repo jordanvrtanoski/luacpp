@@ -22,6 +22,22 @@
    SOFTWARE.
    */
 
-#include "LuaCpp.hpp"
+#ifndef LUACPP_LUAVERSION_HPP
+#define LUACPP_LUAVERSION_HPP
 
-const char LuaCpp::Version[] = "0.0.1";
+#define LUACPP_VERSION_MAJOR		0
+#define LUACPP_VERSION_MINOR		1	
+#define LUACPP_VERSION_REV		0
+
+/**
+ *@brief The main namespace under which the LuaCpp and it's components will be located
+ */
+namespace LuaCpp {
+	
+	/**
+	 *@brief Version of the library
+	 */
+	extern const char Version[];
+}
+
+#endif //LUACPP_LUAVERSION_HPP

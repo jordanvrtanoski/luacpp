@@ -19,6 +19,8 @@ on:
     branches: [ main ]
   schedule:
     - cron: '35 15 * * 5'
+  release:
+    types: [ published, created, edited, prereleased ]
 
 jobs:
   analyze:

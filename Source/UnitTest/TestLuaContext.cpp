@@ -47,6 +47,14 @@ extern "C" {
        lua_pushnumber(L, sum);         /* second result */
        return 2;                   /* number of results */
      }
+
+      // Used for testing of the C library bridge
+      // return only a constant
+      static int bar (lua_State *L) {
+        lua_Number sum = 4.2;
+        lua_pushnumber(L, sum);        /* first result */
+        return 1;                   /* number of results */
+      }
 }
 
 namespace LuaCpp {
@@ -368,7 +376,7 @@ namespace LuaCpp {
 		testing::internal::CaptureStdout();
 
 		EXPECT_NO_THROW(ctx.AddLibrary(lib));
-		EXPECT_NO_THROW(ctx.CompileString("test", "print(\"Result of calling foolib.foo(1,2,3,4) = \" .. foolib.foo(1,2,3,4))"));
+        EXPECT_NO_THROW(ctx.CompileString("test", "print(\"Result of calling foolib.foo(1,2,3,4) = \" .. foolib.foo(1,2,3,4))"));
 		
 		EXPECT_NO_THROW(ctx.Run("test"));
 		
@@ -377,6 +385,30 @@ namespace LuaCpp {
 		EXPECT_EQ("Result of calling foolib.foo(1,2,3,4) = 2.5\n", output);
 
 	}
+
+    TEST_F(TestLuaContext, RegisterCLibrary2Functions) {
+        /**
+         * Register the "foo" and "bar" function written in "C" as a library
+         * and execute it in the new State.
+         */
+        LuaContext ctx;
+
+        std::shared_ptr<Registry::LuaLibrary> lib = std::make_shared<Registry::LuaLibrary>("foolib");
+        lib->AddCFunction("foo", foo);
+        lib->AddCFunction("bar", bar);
+
+        testing::internal::CaptureStdout();
+
+        EXPECT_NO_THROW(ctx.AddLibrary(lib));
+        EXPECT_NO_THROW(ctx.CompileString("test", "print(\"multiple functions\", foolib.foo(1,2,3,4), foolib.bar())"));
+
+        EXPECT_NO_THROW(ctx.Run("test"));
+
+        std::string output = testing::internal::GetCapturedStdout();
+
+        EXPECT_EQ("multiple functions\t2.5\t4.2\n", output);
+
+    }
 
 	TEST_F(TestLuaContext, RegisterCLibraryWithChangedName) {
 		/**
@@ -401,6 +433,8 @@ namespace LuaCpp {
 		EXPECT_EQ("Result of calling foolib.foo(1,2,3,4) = 2.5\n", output);
 
 	}
+
+
 
 	TEST_F(TestLuaContext, TestGlobalVariables) {
 		LuaContext ctx;

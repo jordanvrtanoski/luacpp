@@ -96,7 +96,7 @@ namespace LuaCpp {
 			 * size of the buffer that should be allocated to hold the
 			 * user data in the `lua` context.
 			 */
-			explicit LuaTUserData(size_t _size) : size(_size), LuaType(), userdata(NULL), metatable() {}
+			explicit LuaTUserData(size_t _size) : LuaType(), userdata(NULL), size(_size), metatable() {}
 			
 			/**
 			 * @brief Default destructor

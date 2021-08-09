@@ -112,8 +112,9 @@ namespace LuaCpp {
 			 *
 			 * @return true if the function name is already in the library, otherwise false
 			 */
-			bool Exists(const std::string &name);
-
+			 bool inline Exists(const std::string &name) {
+				return !(functions.find( name ) == functions.end());
+			}
 			/**
 			 * @brief Add function to the library
 			 *

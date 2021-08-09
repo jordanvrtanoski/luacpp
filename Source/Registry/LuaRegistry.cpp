@@ -30,10 +30,6 @@
 
 using namespace LuaCpp::Registry;
 
-bool inline LuaRegistry::Exists(const std::string &name) {
-	return !(registry.find( name ) == registry.end());
-}
-
 void LuaRegistry::CompileAndAddString(const std::string &name, const std::string &code) {
 	CompileAndAddString(name, code, false);
 }

@@ -27,6 +27,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include "../Lua.hpp"
 #include "LuaCodeSnippet.hpp"
@@ -138,8 +139,9 @@ namespace LuaCpp {
 			 *
 			 * @return `true` if the name exists in the registry
 			 */
-			bool Exists(const std::string &name);
-
+			bool inline Exists(const std::string &name) {
+				return !(registry.find( name ) == registry.end());
+			}
 			/**
 			 * @brief Returns the code snipet associated with the name
 			 *

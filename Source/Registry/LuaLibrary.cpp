@@ -37,10 +37,6 @@ void LuaLibrary::setName(const std::string &_name) {
 	name = std::move(_name);
 }
 
-bool inline LuaLibrary::Exists(const std::string &name) {
-	return !(functions.find( name ) == functions.end());
-}
-
 void LuaLibrary::AddCFunction(const std::string &name, lua_CFunction cfunction) {
 	AddCFunction(name, cfunction, false);	
 }
@@ -58,11 +54,10 @@ int LuaLibrary::RegisterFunctions(LuaState &L) {
 	luaL_Reg reg[functions.size()+1];
 	int count = 0;
 
-	for (auto const& x : functions) {
-		
-		LuaCFunction *lcf = (LuaCFunction *) &x.second;
-		reg[count].name = (lcf->getName()).c_str();
-		reg[count].func = lcf->getCFunction();
+	for (auto & x : functions) {
+		LuaCFunction& lcf = x.second;
+		 reg[count].name = x.first.c_str();
+		reg[count].func = lcf.getCFunction();
 		count++;
 	}
 	

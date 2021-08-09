@@ -50,7 +50,7 @@ namespace LuaCpp {
 				std::string str_val;
 				int int_val;
 			  public:
-				explicit Key(int value) : _isNumber(true), int_val(value), str_val() {}
+				explicit Key(int value) : _isNumber(true), str_val(), int_val(value) {}
 				explicit Key(std::string value) : _isNumber(false), str_val(std::move(value)), int_val(0) {}
 				explicit Key(const char *value) : _isNumber(false), str_val(std::string(value)), int_val(0) {}
 				
@@ -89,7 +89,7 @@ namespace LuaCpp {
 			 * @details
 			 * The table information copied in the `C++` context. 
 			 */
-	                std::map<Table::Key, std::shared_ptr<LuaType>> table;
+			 std::map<Table::Key, std::shared_ptr<LuaType>> table;
 		   public:
 
 			/**
@@ -98,7 +98,7 @@ namespace LuaCpp {
 			 * @details
 			 * Explicit constructor of the table
 			 */
-			explicit LuaTTable() : table(), LuaType(), _isArray(true) {}
+			 explicit LuaTTable() :  LuaType(), _isArray(true), table() {}
 
 			/**
 			 * @brief Default destructor

@@ -75,7 +75,9 @@ namespace LuaCpp {
 		EXPECT_NO_THROW(_checkErrorAndThrow(*L, LUA_OK));
 		EXPECT_THROW(_checkErrorAndThrow(*L, LUA_ERRMEM), std::runtime_error);
 		lua_pushstring(*L, "some error");
+#if LUA_VERSION_NUM < 504
 		EXPECT_THROW(_checkErrorAndThrow(*L, LUA_ERRGCMM), std::out_of_range);
+#endif
 		EXPECT_THROW(_checkErrorAndThrow(*L, LUA_ERRSYNTAX), std::logic_error);
 
 		EXPECT_THROW(_checkErrorAndThrow(*L, 9999), std::runtime_error);

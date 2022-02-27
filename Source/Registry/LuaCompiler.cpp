@@ -36,9 +36,11 @@ void inline _checkErrorAndThrow(LuaState &L, int error) {
 			case LUA_ERRMEM:
 				throw std::runtime_error("Out of memory");
 				break;
+#if LUA_VERSION_NUM < 504
 			case LUA_ERRGCMM:
 				throw std::out_of_range("GC Error while loading");
 				break;
+#endif
 			case LUA_ERRSYNTAX:
 				throw std::logic_error(lua_tostring(L,1));
 				break;

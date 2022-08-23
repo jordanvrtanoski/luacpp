@@ -26,8 +26,8 @@
 #define LUACPP_LUAVERSION_HPP
 
 #define LUACPP_VERSION_MAJOR		0
-#define LUACPP_VERSION_MINOR		2	
-#define LUACPP_VERSION_REV		0
+#define LUACPP_VERSION_MINOR		3
+#define LUACPP_VERSION_REV			0
 
 /**
  *@brief The main namespace under which the LuaCpp and it's components will be located

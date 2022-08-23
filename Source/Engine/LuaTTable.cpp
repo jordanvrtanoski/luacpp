@@ -203,7 +203,7 @@ std::map<Table::Key, std::shared_ptr<LuaType>> LuaTTable::getValues() const {
 	return table;
 }
 
-LuaType &LuaTTable::getValue(Table::Key key) const {
+LuaType &LuaTTable::getValue(Table::Key key) {
 	return *table[key];
 }
 

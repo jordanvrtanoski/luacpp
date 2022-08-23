@@ -184,7 +184,7 @@ namespace LuaCpp {
 			 * @returns
 			 * Valute associtated with the key
 			 */
-			LuaType &getValue(Table::Key key) const;
+			LuaType &getValue(Table::Key key);
 
 			/**
 			 * @brief Sets a value for the associtated key

@@ -111,7 +111,7 @@ namespace LuaCpp {
 			 *
 			 * @see LuaType.getTypeId()
 			 */
-			int getTypeId();
+			int getTypeId() const;
 
 			/**
 			 * @brief Returns the string representation of the type
@@ -122,7 +122,7 @@ namespace LuaCpp {
 			 * @see LuaType.getTypeName()
 			 *
 			 */
-			std::string getTypeName(LuaState &L);
+			std::string getTypeName(LuaState &L) const;
 
 			/**
 			 * @brief Pushes the user data on the top fo the stack
@@ -156,7 +156,7 @@ namespace LuaCpp {
 			 * @details
 			 * Returns the string representing the user data
 			 */
-			virtual std::string ToString();
+			virtual std::string ToString() const;
 
 			/**
 			 * @brief Returns the raw pointer to the allocated buffer
@@ -164,7 +164,7 @@ namespace LuaCpp {
 			 * @details
 			 * Returns the raw pointer to the allocated buffer
 			 */
-			void *getRawUserData();
+			void *getRawUserData() const;
 
 			/**
 			 * @biref adds a metafunction in the metatable

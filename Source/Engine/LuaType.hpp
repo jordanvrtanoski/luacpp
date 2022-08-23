@@ -61,7 +61,7 @@ namespace LuaCpp {
 			 * @details
 			 * Used to initalize the states of the `global` and `globalName` members.
 			 */
-			LuaType(); 
+			LuaType();
 
 			/**
 			 * @brief Default destructor
@@ -84,7 +84,7 @@ namespace LuaCpp {
 			 * @returns
 			 * integer value for the type id
 			 */
-			virtual int getTypeId() = 0;
+			virtual int getTypeId() const = 0;
 
 			/**
 			 * @brief Returns the string representation of the type
@@ -99,7 +99,7 @@ namespace LuaCpp {
 			 * @returns
 			 * String with the name of the lua type
 			 */
-			virtual std::string getTypeName(LuaState &L) = 0;
+			virtual std::string getTypeName(LuaState &L) const = 0;
 
 			/**
 			 * @brief Pushes the value on the LuaState on the top of the stack
@@ -149,8 +149,8 @@ namespace LuaCpp {
 			 * @returns
 			 * String representation of the value
 			 */
-			virtual std::string ToString() = 0;
-			
+			virtual std::string ToString() const = 0;
+
 			/**
 			 * @brief Reads the value from the top of the stack
 			 *
@@ -176,7 +176,7 @@ namespace LuaCpp {
 			 * and removes the value from the stack.
 			 *
 			 * After the call, the stack remains balanced.
-			 * 
+			 *
 			 * @param L LuaState representing the instace of the lua engine
 			 * @param global_name the name under which the value will be registered
 			 */
@@ -221,7 +221,7 @@ namespace LuaCpp {
 			 * @returns
 			 * true if the variable is global
 			 */
-			bool isGlobal();
+			bool isGlobal() const;
 
 			/**
 			 * @brief returns the global name
@@ -232,7 +232,7 @@ namespace LuaCpp {
 			 * @returns
 			 * The global name.
 			 */
-			std::string getGlobalName();
+			std::string getGlobalName() const;
 		};
 	}
 }

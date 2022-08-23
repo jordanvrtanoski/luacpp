@@ -74,7 +74,7 @@ namespace LuaCpp {
 			 *
 			 * @see LuaType.getTypeId()
 			 */
-			int getTypeId();
+			int getTypeId() const;
 
 			/**
 			 * @brief Returns the string representation of the type
@@ -85,7 +85,7 @@ namespace LuaCpp {
 			 * @see LuaType.getTypeName()
 			 *
 			 */
-			std::string getTypeName(LuaState &L);
+			std::string getTypeName(LuaState &L) const;
 
 			/**
 			 * @brief Pushes the number on the top fo the stack
@@ -116,7 +116,7 @@ namespace LuaCpp {
 			 * @details
 			 * Returns the string with the double value
 			 */
-			std::string ToString();
+			std::string ToString() const;
 
 			/**
 			 * @brief Returns the value of the std::string 
@@ -127,7 +127,7 @@ namespace LuaCpp {
 			 * @return
 			 * double value encapsulated by the class
 			 */
-			std::string getValue();
+			std::string getValue() const;
 
 			/**
 			 * @brief Set the double value

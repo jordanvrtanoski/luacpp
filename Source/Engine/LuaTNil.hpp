@@ -65,7 +65,7 @@ namespace LuaCpp {
 			 *
 			 * @see LuaType.getTypeId()
 			 */
-			int getTypeId();
+			int getTypeId() const;
 
 			/**
 			 * @brief Returns the string representation of the type
@@ -76,7 +76,7 @@ namespace LuaCpp {
 			 * @see LuaType.getTypeName()
 			 *
 			 */
-			std::string getTypeName(LuaState &L);
+			std::string getTypeName(LuaState &L) const;
 
 			/**
 			 * @brief Pushes a LUA_TNIL on the top fo the stack
@@ -105,7 +105,7 @@ namespace LuaCpp {
 			 *
 			 * @see LuaType.ToString()
 			 */
-			std::string ToString();
+			std::string ToString() const;
 		};
 	}
 }

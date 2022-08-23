@@ -36,7 +36,7 @@ namespace LuaCpp {
 		 * @brief Implementation of the LUA_TBOOLEAN type
 		 *
 		 * @details
-		 * Implementation of the LUA_TBOOLEAN type. 
+		 * Implementation of the LUA_TBOOLEAN type.
 		 */
 		class LuaTBoolean : public LuaType {
 	           private:
@@ -66,7 +66,7 @@ namespace LuaCpp {
 			 *
 			 * @see LuaType.getTypeId()
 			 */
-			int getTypeId();
+			int getTypeId() const;
 
 			/**
 			 * @brief Returns the string representation of the type
@@ -77,7 +77,7 @@ namespace LuaCpp {
 			 * @see LuaType.getTypeName()
 			 *
 			 */
-			std::string getTypeName(LuaState &L);
+			std::string getTypeName(LuaState &L) const;
 
 			/**
 			 * @brief Pushes the value on the top fo the stack
@@ -95,7 +95,7 @@ namespace LuaCpp {
 			 * @details
 			 * Reads a vlue from the stack. The method will check if the stack
 			 * on the index has the LUA_TBOOLEAN type, and if not will throw an error.
-			 * If the value is LUA_TBOOLEAN, the value will be read from the `lua` context 
+			 * If the value is LUA_TBOOLEAN, the value will be read from the `lua` context
 			 *
 			 * @see LuaType.PopValue()
 			 */
@@ -103,11 +103,11 @@ namespace LuaCpp {
 			void PopValue(LuaState &L, int idx);
 
 			/**
-			 * @brief Returns string with the value `true`/`false` 
+			 * @brief Returns string with the value `true`/`false`
 			 *
 			 * @see LuaType.ToString()
 			 */
-			std::string ToString();
+			std::string ToString() const ;
 
 			/**
 			 * @brief Returns the value of the boolan
@@ -118,7 +118,7 @@ namespace LuaCpp {
 			 * @return
 			 * boolean value encapsulated by the class
 			 */
-			bool getValue();
+			bool getValue() const;
 
 			/**
 			 * @brief Set the boolean value

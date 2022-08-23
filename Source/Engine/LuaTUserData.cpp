@@ -28,11 +28,11 @@
 
 using namespace LuaCpp::Engine;
 
-int LuaTUserData::getTypeId() {
+int LuaTUserData::getTypeId() const {
 	return LUA_TUSERDATA;
 }
 
-std::string LuaTUserData::getTypeName(LuaState &L) {
+std::string LuaTUserData::getTypeName(LuaState &L) const {
 	return std::string(lua_typename(L, LUA_TUSERDATA));
 }
 
@@ -62,7 +62,7 @@ void LuaTUserData::PopValue(LuaState &L, int idx) {
 	}
 }
 
-std::string LuaTUserData::ToString() {
+std::string LuaTUserData::ToString() const {
 	return "userdata";
 }
 
@@ -72,7 +72,7 @@ void LuaTUserData::_storeData() {
 void LuaTUserData::_retreiveData() {
 }
 
-void* LuaTUserData::getRawUserData() {
+void* LuaTUserData::getRawUserData() const {
 	return userdata;
 }
 

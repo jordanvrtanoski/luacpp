@@ -59,10 +59,10 @@ void LuaType::PopGlobal(LuaState &L, std::string _global_name) {
 	PopGlobal(L);
 }
 
-bool LuaType::isGlobal() {
+bool LuaType::isGlobal() const {
 	return global;
 }
 
-std::string LuaType::getGlobalName() {
+std::string LuaType::getGlobalName() const {
 	return globalName;
 }

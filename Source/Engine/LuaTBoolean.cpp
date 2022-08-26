@@ -26,11 +26,11 @@
 
 using namespace LuaCpp::Engine;
 
-int LuaTBoolean::getTypeId() {
+int LuaTBoolean::getTypeId() const {
 	return LUA_TBOOLEAN;
 }
 
-std::string LuaTBoolean::getTypeName(LuaState &L) {
+std::string LuaTBoolean::getTypeName(LuaState &L) const {
 	return std::string(lua_typename(L, LUA_TBOOLEAN));
 }
 
@@ -46,7 +46,7 @@ void LuaTBoolean::PopValue(LuaState &L, int idx) {
 	}
 }
 
-std::string LuaTBoolean::ToString() {
+std::string LuaTBoolean::ToString() const {
 	if (value) {
 		return "true";
 	} else {
@@ -54,7 +54,7 @@ std::string LuaTBoolean::ToString() {
 	}
 }
 
-bool LuaTBoolean::getValue() {
+bool LuaTBoolean::getValue() const {
 	return value;
 }
 

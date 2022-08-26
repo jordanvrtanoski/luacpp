@@ -26,11 +26,11 @@
 
 using namespace LuaCpp::Engine;
 
-int LuaTNumber::getTypeId() {
+int LuaTNumber::getTypeId() const {
 	return LUA_TNUMBER;
 }
 
-std::string LuaTNumber::getTypeName(LuaState &L) {
+std::string LuaTNumber::getTypeName(LuaState &L) const {
 	return std::string(lua_typename(L, LUA_TNUMBER));
 }
 
@@ -46,11 +46,11 @@ void LuaTNumber::PopValue(LuaState &L, int idx) {
 	}
 }
 
-std::string LuaTNumber::ToString() {
+std::string LuaTNumber::ToString() const {
 	return std::to_string(value);
 }
 
-double LuaTNumber::getValue() {
+double LuaTNumber::getValue() const {
 	return value;
 }
 

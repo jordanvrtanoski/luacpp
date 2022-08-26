@@ -26,11 +26,11 @@
 
 using namespace LuaCpp::Engine;
 
-int LuaTNil::getTypeId() {
+int LuaTNil::getTypeId() const {
 	return LUA_TNIL;
 }
 
-std::string LuaTNil::getTypeName(LuaState &L) {
+std::string LuaTNil::getTypeName(LuaState &L) const {
 	return std::string(lua_typename(L, LUA_TNIL));
 }
 
@@ -44,6 +44,6 @@ void LuaTNil::PopValue(LuaState &L, int idx) {
 	}
 }
 
-std::string LuaTNil::ToString() {
+std::string LuaTNil::ToString() const {
 	return "nil";
 }

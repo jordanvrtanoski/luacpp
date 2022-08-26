@@ -53,13 +53,13 @@ namespace LuaCpp {
 				explicit Key(int value) : _isNumber(true), str_val(), int_val(value) {}
 				explicit Key(std::string value) : _isNumber(false), str_val(std::move(value)), int_val(0) {}
 				explicit Key(const char *value) : _isNumber(false), str_val(std::string(value)), int_val(0) {}
-				
-				bool isNumber();
 
-				std::string getStringValue();
-				int getIntValue();
+				bool isNumber() const;
 
-				std::string ToString();
+				std::string getStringValue() const;
+				int getIntValue() const;
+
+				std::string ToString() const;
 
 				friend bool operator <(const Key &lhs, const Key &rhs);
 				friend bool operator ==(const Key &lhs, const Key &rhs);
@@ -87,13 +87,13 @@ namespace LuaCpp {
 			 * @brief table information in the `C++` context
 			 *
 			 * @details
-			 * The table information copied in the `C++` context. 
+			 * The table information copied in the `C++` context.
 			 */
 			 std::map<Table::Key, std::shared_ptr<LuaType>> table;
 		   public:
 
 			/**
-			 * @brief explicit constructor 
+			 * @brief explicit constructor
 			 *
 			 * @details
 			 * Explicit constructor of the table
@@ -113,7 +113,7 @@ namespace LuaCpp {
 			 *
 			 * @see LuaType.getTypeId()
 			 */
-			int getTypeId();
+			int getTypeId() const;
 
 			/**
 			 * @brief Returns the string representation of the type
@@ -124,7 +124,7 @@ namespace LuaCpp {
 			 * @see LuaType.getTypeName()
 			 *
 			 */
-			std::string getTypeName(LuaState &L);
+			std::string getTypeName(LuaState &L) const;
 
 			/**
 			 * @brief Pushes the table on the top fo the stack
@@ -161,7 +161,7 @@ namespace LuaCpp {
 			 * @details
 			 * Returns the keys and values from the table in a JSON format
 			 */
-			std::string ToString();
+			std::string ToString() const;
 
 			/**
 			 * @brief Returns the encapsulated std::map
@@ -172,13 +172,13 @@ namespace LuaCpp {
 			 * @return
 			 * the encapsulated table
 			 */
-			std::map<Table::Key, std::shared_ptr<LuaType>> getValues();
+			std::map<Table::Key, std::shared_ptr<LuaType>> getValues() const;
 
 			/**
 			 * @breif Returns the value stored at the key
 			 *
 			 * @details
-			 * Returns the value stored at the key. If the key is not found, 
+			 * Returns the value stored at the key. If the key is not found,
 			 * a nil value will be returned
 			 *
 			 * @returns

@@ -70,7 +70,7 @@ namespace LuaCpp {
 			 *
 			 * @see LuaType.getTypeId()
 			 */
-			int getTypeId();
+			int getTypeId() const;
 			
 			/**
 			 * @brief Returns the string representation of the type
@@ -81,7 +81,7 @@ namespace LuaCpp {
 			 * @see LuaType.getTypeName()
 			 *
 			 */
-			std::string getTypeName(LuaState &L);
+			std::string getTypeName(LuaState &L) const;
 
 			/**
 			 * @brief Pushes the number on the top fo the stack
@@ -99,7 +99,7 @@ namespace LuaCpp {
 			 * @details
 			 * Reads a vlue from the stack. The method will check if the stack
 			 * on the index has the LUA_TNUMBER type, and if not will throw an error.
-			 * If the value is LUA_TNUMBER, the value will be read from the `lua` context 
+			 * If the value is LUA_TNUMBER, the value will be read from the `lua` context
 			 *
 			 * @see LuaType.PopValue()
 			 */
@@ -112,7 +112,7 @@ namespace LuaCpp {
 			 * @details
 			 * Returns the string with the double value
 			 */
-			std::string ToString();
+			std::string ToString() const;
 
 
 			/**
@@ -124,7 +124,7 @@ namespace LuaCpp {
 			 * @return
 			 * double value encapsulated by the class
 			 */
-			double getValue();
+			double getValue() const;
 
 			/**
 			 * @brief Set the double value

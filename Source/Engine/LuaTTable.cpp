@@ -70,7 +70,7 @@ namespace LuaCpp {
 	}
 }
 
-std::string Key::ToString() {
+std::string Key::ToString() const {
 	if (_isNumber) {
 		return std::to_string(int_val);
 	} else {
@@ -78,15 +78,15 @@ std::string Key::ToString() {
 	}
 }
 
-std::string Key::getStringValue() {
+std::string Key::getStringValue() const {
 	return str_val;
 }
 
-int Key::getIntValue() {
+int Key::getIntValue() const {
 	return int_val;
 }
 
-inline bool Key::isNumber() {
+inline bool Key::isNumber() const {
 	return _isNumber;
 }
 
@@ -95,11 +95,11 @@ inline bool Key::isNumber() {
  * LuaTTable
  */
 
-int LuaTTable::getTypeId() {
+int LuaTTable::getTypeId() const {
 	return LUA_TTABLE;
 }
 
-std::string LuaTTable::getTypeName(LuaState &L) {
+std::string LuaTTable::getTypeName(LuaState &L) const {
 	return std::string(lua_typename(L, LUA_TTABLE));
 }
 
@@ -168,7 +168,7 @@ void LuaTTable::PopValue(LuaState &L, int idx) {
 	}
 }
 
-std::string LuaTTable::ToString() {
+std::string LuaTTable::ToString() const {
 	std::stringstream sso;
 	if (_isArray) {
 		sso << "[ ";
@@ -199,8 +199,8 @@ std::string LuaTTable::ToString() {
 	return sso.str();
 }
 
-std::map<Table::Key, std::shared_ptr<LuaType>> LuaTTable::getValues() {
-	return table; 
+std::map<Table::Key, std::shared_ptr<LuaType>> LuaTTable::getValues() const {
+	return table;
 }
 
 LuaType &LuaTTable::getValue(Table::Key key) {

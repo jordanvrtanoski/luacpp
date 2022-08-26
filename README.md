@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 ```
 
 Compile the code with 
-```
+```bash
 ~$ gcc hello.cpp -I /usr/local/include/LuaCpp -I /usr/include/lua5.3/ -lluacpp -llua5.3 -lstdc++ -o hello
 ~$ hello
 Hi from C++, this is a demo how LuaCpp can be used
@@ -204,18 +204,18 @@ int main(int argc, char **argv) {
 
 Clone the project and from the root of the project, invoke:
 
-```
+```bash
 mkdir build
 cd build
 cmake ../Source
-make -j 4
+make -j$(nproc)
 make install
 ```
 
 
 ## Building documents
 
-```
+```bash
 sudo apt-get install texlive-latex-base texlive-latex-recommended texlive-latex-extra graphviz
 
 mkdir build
@@ -227,35 +227,35 @@ make doc_pdf
 
 ## Testing the memory management
 
-```
+```bash
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Debug ../Source
 
-make -j 4
+make -j$(nproc)
 make test_memory
 ```
 
 ## Running the unit test and debugging
 
-```
+```bash
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Debug ../Source
 
-make -j 4
+make -j$(nproc)
 make test 
 ```
 
 ## Running the coverage test
 
-```
+```bash
 apt install gcovr
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Coverage ../Source
 
-make -j 4
+make -j$(nproc)
 make coverage-cli
 make coverage-html
 ```

@@ -24,4 +24,4 @@
 
 #include "LuaVersion.hpp"
 
-const char LuaCpp::Version[] = "0.1.0";
+const char LuaCpp::Version[] = "0.3.0";

@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
 
 	std::shared_ptr<Engine::LuaTString> str = std::make_shared<Engine::LuaTString>("world from C++!");
 
-	ctx.AddGlobalVariable("world", str));
+	ctx.AddGlobalVariable("world", str);
 	ctx.CompileString("test", "print('Hello '..world) world = 'world from lua!'");
 	try {
 		ctx.Run("test");

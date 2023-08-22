@@ -140,11 +140,11 @@ class MetaMap : public LuaMetaObject {
 
 ## Adding Custom Libraries to lua engine
 
-LuaCpp allows you to register custom `C` functions as a library in the LuaContext. The libarary will
+LuaCpp allows you to register custom `C` functions as a library in the LuaContext. The library will
 be uploaded to the LuaState whenever a new state is instantiated (similar to the global variables). 
 Creating library will require understanding of the low-level lua and LuaCpp functions.
 
-The library can contin multiple functions that should be registred under different names. The names can not 
+The library can contain multiple functions that should be registred under different names. The names can not 
 overlap, however, the function call will receive all arguments that are passed from the lua invocation, so the
 function can implement different behaviours based on the number and type of the arguments. 
 

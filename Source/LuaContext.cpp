@@ -41,12 +41,24 @@ std::unique_ptr<LuaState> LuaContext::newState() {
 std::unique_ptr<LuaState> LuaContext::newState(const LuaEnvironment &env) {
 	std::unique_ptr<LuaState> L = std::make_unique<LuaState>();
 	luaL_openlibs(*L);
+
 	for(const auto &lib : libraries ) {
 		((std::shared_ptr<LuaLibrary>) lib.second)->RegisterFunctions(*L);
 	}
+
+	registerHooks(*L);
+
 	for(const auto &var : env) {
 		((std::shared_ptr<LuaType>) var.second)->PushGlobal(*L, var.first);
 	}
+
+	// push new lua built-in functions to global:
+	for(std::pair<const std::string, LuaCpp::Registry::LuaCFunction> builtInFunction : builtInFunctions)
+	{
+		lua_pushcfunction(*L, builtInFunction.second.getCFunction());
+		lua_setglobal(*L, builtInFunction.first.c_str());
+	}
+
 	lua_pushstring(*L, std::string(LuaCpp::Version).c_str());
 	lua_setglobal(*L, "_luacppversion");
 
@@ -141,6 +153,123 @@ void LuaContext::RunWithEnvironment(const std::string &name, const LuaEnvironmen
 	}
 
 }
+
+std::shared_ptr<Registry::LuaLibrary> LuaContext::getStdLibrary(const std::string &libName)
+{
+	std::shared_ptr<LuaLibrary> foundLibrary = NULL;
+	std::unique_ptr<LuaCpp::Engine::LuaState> L = newState(globalEnvironment);
+	lua_getglobal(*L, libName.c_str());
+
+	if(lua_istable(*L, 1))
+	{
+		// get metatable-name for corresponding standard-library:
+		if(libName == "io")
+		{
+			foundLibrary = std::make_shared<LuaLibrary>(libName, LUA_FILEHANDLE);
+		}
+
+		else
+		{
+			foundLibrary = std::make_shared<LuaLibrary>(libName);
+		}
+
+		lua_pushnil(*L);
+
+		while(lua_next(*L, -2) != 0)
+		{
+			foundLibrary->AddCFunction(lua_tostring(*L, -2), lua_tocfunction(*L, -1));
+
+			lua_pop(*L, 1);
+		}
+
+		// check, if for this library a metatable exists at all:
+		if(luaL_getmetatable(*L, foundLibrary->getMetaTableName().c_str()))
+		{
+			// get meta-methods of library:
+			// ============================
+			lua_pushnil(*L);
+
+			while(lua_next(*L, -2) != 0)
+			{
+				// check, if it is a meta-method:
+				if(lua_iscfunction(*L, -1))
+				{
+					foundLibrary->AddCMethod(lua_tostring(*L, -2), lua_tocfunction(*L, -1));
+				}
+
+				lua_pop(*L, 1);
+			}
+
+			// get methods of library:
+			// =======================
+			lua_getfield(*L, -1, "__index");
+			lua_pushnil(*L);
+
+			while(lua_next(*L, -2) != 0)
+			{
+				foundLibrary->AddCMethod(lua_tostring(*L, -2), lua_tocfunction(*L, -1));
+
+				lua_pop(*L, 1);
+			}
+		}
+	}
+
+	return foundLibrary;
+}
+
+std::shared_ptr<Registry::LuaCFunction> LuaContext::getBuiltInFnc(const std::string &fncName)
+{
+	std::shared_ptr<Registry::LuaCFunction> builtInFnc = NULL;
+	std::unique_ptr<LuaCpp::Engine::LuaState> L = newState(globalEnvironment);
+
+	lua_getglobal(*L, fncName.c_str());
+
+	// check, if it is a function at all:
+	if(lua_iscfunction(*L, 1))
+	{
+		builtInFnc = std::shared_ptr<Registry::LuaCFunction>(new Registry::LuaCFunction(lua_tocfunction(*L, 1)));
+	}
+
+	return builtInFnc;
+}
+
+void LuaContext::setBuiltInFnc(const std::string &fncName, lua_CFunction cfunction)
+{
+	setBuiltInFnc(fncName, cfunction, false);
+}
+
+void LuaContext::setBuiltInFnc(const std::string &fncName, lua_CFunction cfunction, bool replace)
+{
+	std::unique_ptr<LuaCpp::Engine::LuaState> L = newState(globalEnvironment);
+
+	// if we want to replace already existing function, we have to remove old one from list first:
+	if(replace)
+	{
+		builtInFunctions.erase(fncName);
+
+		// check, if function still exists in global environment, so we delete it there:
+		if(Exists_buildInFnc(*L, fncName))
+		{
+			lua_pushnil(*L);
+			lua_setglobal(*L, fncName.c_str());
+		}
+	}
+
+	// check, if function already exists:
+	if(!Exists_buildInFnc(*L, fncName))
+	{
+		std::unique_ptr<LuaCFunction> func = std::make_unique<LuaCFunction>(cfunction);
+		func->setName(fncName);
+		builtInFunctions.insert(std::make_pair(fncName, std::move(*func)));
+	}
+}
+
+bool LuaContext::Exists_buildInFnc(Engine::LuaState &L, const std::string &fncName) 
+{
+	lua_getglobal(L, fncName.c_str());
+
+	return !(builtInFunctions.find( fncName ) == builtInFunctions.end()) || (!lua_isnil(L, -1));
+}
 		
 void LuaContext::AddLibrary(std::shared_ptr<Registry::LuaLibrary> &library) {
 	libraries[library->getName()] = std::move(library);
@@ -154,3 +283,38 @@ std::shared_ptr<Engine::LuaType> &LuaContext::getGlobalVariable(const std::strin
 	return globalEnvironment[name];
 }
 
+void LuaContext::addHook(lua_Hook hookFunc, const std::string &hookType, const int count)
+{
+	hooks.push_back(std::tuple<std::string, int, lua_Hook>(hookType, count, hookFunc));
+}
+
+void LuaContext::registerHooks(LuaCpp::Engine::LuaState &L)
+{
+	for(const auto &hook : hooks) 
+	{
+		int mask;
+		int count = std::get<1>(hook);
+
+		if(std::get<0>(hook) == "call")
+		{
+			mask = LUA_MASKCALL;
+		}
+
+		else if(std::get<0>(hook) == "return")
+		{
+			mask = LUA_MASKRET;
+		}
+
+		else if(std::get<0>(hook) == "line")
+		{
+			mask = LUA_MASKLINE;
+		}
+
+		else if(std::get<0>(hook) == "count")
+		{
+			mask = LUA_MASKCOUNT;
+		}
+
+		lua_sethook(L, std::get<2>(hook), mask, count);
+	}
+}

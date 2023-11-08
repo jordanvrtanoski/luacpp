@@ -63,9 +63,20 @@ namespace LuaCpp {
 		std::map<std::string, std::shared_ptr<Registry::LuaLibrary>> libraries;
 
 		/**
+		 * @brief Array, which will keep the added hooks.
+		 * 
+		 */
+		std::vector<std::tuple<std::string, int, lua_Hook> > hooks;
+
+		/**
 		 *
 		 */
 		LuaEnvironment globalEnvironment;
+
+		/**
+		 *
+		 */
+		std::map<std::string, LuaCpp::Registry::LuaCFunction> builtInFunctions;
 
 	public:
 
@@ -77,7 +88,7 @@ namespace LuaCpp {
 		 * for the communication with the Lua virtual machine
 		 * from the high level APIs.
 		 */
-		LuaContext() : registry(), libraries(), globalEnvironment() {};
+		LuaContext() : registry(), libraries(), globalEnvironment(), builtInFunctions() {};
 		~LuaContext() {};
 
 		/**
@@ -369,11 +380,68 @@ namespace LuaCpp {
 		void RunWithEnvironment(const std::string &name, const LuaEnvironment &env);
 
 		/**
+		* @brief Get a LUA standard library
+		*
+		* @details
+		* Returns a LUA standard library, such that it will be possible to overwrite certain functions of it or extend it with new functions.
+		*
+		* @param libName The name of the standard LUA library
+		*
+		* @return pointer to the found standard LUA library with the respective name.
+		*/
+		std::shared_ptr<Registry::LuaLibrary> getStdLibrary(const std::string &libName);
+
+		/**
+		* @brief Get a LUA built-in function
+		*
+		* @details
+		* Returns a LUA built-in function, such that it will be possible to overwrite it.
+		*
+		* @param fncName The name of the built-in LUA function
+		*
+		* @return pointer to the found LUA built-in function with the respective name.
+		*/
+		std::shared_ptr<Registry::LuaCFunction> getBuiltInFnc(const std::string &fncName);
+
+		/**
+		* @brief Set a LUA built-in function
+		*
+		* @details
+		* Sets a LUA built-in function, such that it will be possible to overwrite existing ones or create new ones.
+		*
+		* @param fncName The name of the built-in LUA function
+		* @param cfunction The lua_CFunction which shall be registered globally
+		*/
+		void setBuiltInFnc(const std::string &fncName, lua_CFunction cfunction);
+
+		/**
+		* @brief Set a LUA built-in function
+		*
+		* @details
+		* Sets a LUA built-in function, such that it will be possible to overwrite existing ones or create new ones.
+		*
+		* @param fncName The name of the built-in LUA function
+		* @param cfunction The lua_CFunction which shall be registered globally
+		* @param replace replaces the method if already exits
+		*/
+		void setBuiltInFnc(const std::string &fncName, lua_CFunction cfunction, bool replace);
+
+		/**
+		 * @brief Check if the built-in function exists in the global env
+		 *
+		 * @details
+		 * Check if the global env contains function under the given name
+		 *
+		 * @return true if the function name is already in the global env, otherwise false
+		 */
+		bool Exists_buildInFnc(Engine::LuaState &L, const std::string &fncName);
+
+		/**
 		* @brief Add a `C` library to the context
 		*
 		* @details
 		* Adds a `C` library to the context. The library will be loaded whenever a
-		* new state is created fron the context.
+		* new state is created from the context.
 		*
 		* @param library The library containing `C` functions
 		*/
@@ -408,6 +476,10 @@ namespace LuaCpp {
 		 * The shared pointer of the global variable
 		 */
 		std::shared_ptr<Engine::LuaType> &getGlobalVariable(const std::string &name);
+
+		void addHook(lua_Hook hookFunc, const std::string &hookType, const int count = 0);
+
+		void registerHooks(LuaCpp::Engine::LuaState &L);
 	};
 }
 

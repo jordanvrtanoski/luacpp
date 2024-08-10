@@ -145,12 +145,12 @@ gtest_discover_tests(testLuaMetaObject)
 find_program(valgrind valgrind)
 
 if (valgrind)
-	message(STATUS "Found command 'valgrand' => Use target 'test_memory' to perform memory test")
+	message(STATUS "Found command 'valgrind' => Use target 'test_memory' to perform memory test")
 	add_custom_target( test_memory
 		COMMAND valgrind -v --run-cxx-freeres=yes --run-libc-freeres=yes make test 
 	)
 else()
-	message(WARNING "Cannot find command 'valgrand' => Please install package 'valgrand' to run memory tests")
+	message(WARNING "Cannot find command 'valgrind' => Please install package 'valgrind' to run memory tests")
 endif()
 
 

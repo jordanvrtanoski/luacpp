@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
 	// Creage Lua context
 	LuaContext lua;
 
-	// Create library "foo" conatining the "foo" function
+	// Create library "foolib" containing the "sum" function
 	std::shared_ptr<LuaLibrary> lib = std::make_shared<LuaLibrary>("foolib");
 	lib->AddCFunction("sum", _sum);
 

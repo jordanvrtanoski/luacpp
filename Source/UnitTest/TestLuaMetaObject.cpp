@@ -86,14 +86,7 @@ namespace LuaCpp {
 
 		EXPECT_NO_THROW(obj->setValue(0, obj));
 		EXPECT_NO_THROW(obj->setValue(key, obj));
-
-		
-		LuaTString str("1");
-		LuaTTable tbl();
-		LuaTNumber nbr(1);
-		LuaTBoolean bol(true);
-		LuaTNil nil();
-		
+				
 	}
 
 	TEST_F(TestLuaMetaObject, TestCPPMapFromLua) {

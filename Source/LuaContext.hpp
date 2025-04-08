@@ -26,6 +26,7 @@
 #define LUACPP_LUACONTEXT_HPP
 
 #include <memory>
+#include <optional>
 
 #include "Registry/LuaRegistry.hpp"
 #include "Registry/LuaLibrary.hpp"
@@ -103,7 +104,7 @@ namespace LuaCpp {
 		 *
 		 * @return Pointer to the LuaState object holding the pointer of the lua_State
 		 */
-		std::unique_ptr<Engine::LuaState> newState();
+		std::unique_ptr<Engine::LuaState> newState(std::optional<Engine::StateParams> params = std::nullopt);
 
 		/**
 		 * @brief Creates new Lua execution state from the context
@@ -118,7 +119,7 @@ namespace LuaCpp {
 		 *
 		 * @return Pointer to the LuaState object holding the pointer of the lua_State
 		 */
-		std::unique_ptr<Engine::LuaState> newState(const LuaEnvironment &env);
+		std::unique_ptr<Engine::LuaState> newState(const LuaEnvironment &env, std::optional<Engine::StateParams> params = std::nullopt);
 
 		/**
 		 * @brief Creates new Lua execution state from the context and loads a snippet
@@ -140,7 +141,7 @@ namespace LuaCpp {
 		 *
 		 * @return Pointer to the LuaState object holding the pointer of the lua_State
 		 */
-	        std::unique_ptr<Engine::LuaState> newStateFor(const std::string &name);
+	        std::unique_ptr<Engine::LuaState> newStateFor(const std::string &name, std::optional<Engine::StateParams> params = std::nullopt);
 		
 		/**
 		 * @brief Creates new Lua execution state from the context and loads a snippet
@@ -162,7 +163,7 @@ namespace LuaCpp {
 		 *
 		 * @return Pointer to the LuaState object holding the pointer of the lua_State
 		 */
-	        std::unique_ptr<Engine::LuaState> newStateFor(const std::string &name, const LuaEnvironment &env);
+	        std::unique_ptr<Engine::LuaState> newStateFor(const std::string &name, const LuaEnvironment &env, std::optional<Engine::StateParams> params = std::nullopt);
 
 		/**
 		 * @brief Compiles a string containing Lua code and adds it to the repository
@@ -377,7 +378,7 @@ namespace LuaCpp {
 		 *
 		 * @param name Name under which the snippet is registered
 		 */
-		void RunWithEnvironment(const std::string &name, const LuaEnvironment &env);
+		void RunWithEnvironment(const std::string &name, const LuaEnvironment &env, std::optional<Engine::StateParams> params = std::nullopt);
 
 		/**
 		* @brief Get a LUA standard library

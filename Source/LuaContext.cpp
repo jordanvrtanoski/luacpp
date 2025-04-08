@@ -34,12 +34,17 @@ using namespace LuaCpp::Engine;
 using namespace LuaCpp::Registry;
 
 
-std::unique_ptr<LuaState> LuaContext::newState() {
-	return newState(globalEnvironment);
+std::unique_ptr<LuaState> LuaContext::newState(std::optional<Engine::StateParams> params) {
+	return newState(globalEnvironment, params);
 }
 
-std::unique_ptr<LuaState> LuaContext::newState(const LuaEnvironment &env) {
-	std::unique_ptr<LuaState> L = std::make_unique<LuaState>();
+std::unique_ptr<LuaState> LuaContext::newState(const LuaEnvironment &env, std::optional<Engine::StateParams> params) {
+	std::unique_ptr<LuaState> L = nullptr;
+	if (params) {
+		L = std::make_unique<LuaState>(*params);
+	} else {
+		L = std::make_unique<LuaState>();
+	}
 	luaL_openlibs(*L);
 
 	for(const auto &lib : libraries ) {
@@ -65,14 +70,14 @@ std::unique_ptr<LuaState> LuaContext::newState(const LuaEnvironment &env) {
 	return L;
 }
 
-std::unique_ptr<LuaState> LuaContext::newStateFor(const std::string &name) {
-	return newStateFor(name, globalEnvironment);
+std::unique_ptr<LuaState> LuaContext::newStateFor(const std::string &name, std::optional<Engine::StateParams> params) {
+	return newStateFor(name, globalEnvironment, params);
 }
 
-std::unique_ptr<LuaState> LuaContext::newStateFor(const std::string &name, const LuaEnvironment &env) {
+std::unique_ptr<LuaState> LuaContext::newStateFor(const std::string &name, const LuaEnvironment &env, std::optional<Engine::StateParams> params) {
 	if (registry.Exists(name)) {
 		std::unique_ptr<LuaCodeSnippet> cs = registry.getByName(name);
-		std::unique_ptr<LuaState> L = newState(env);
+		std::unique_ptr<LuaState> L = newState(env, params);
 		cs->UploadCode(*L);
 		return L;	
 	}	
@@ -135,8 +140,8 @@ void LuaContext::Run(const std::string &name) {
 	RunWithEnvironment(name, globalEnvironment);
 }
 
-void LuaContext::RunWithEnvironment(const std::string &name, const LuaEnvironment &env) {
-	std::unique_ptr<LuaState> L = newStateFor(name);
+void LuaContext::RunWithEnvironment(const std::string &name, const LuaEnvironment &env, std::optional<Engine::StateParams> params) {
+	std::unique_ptr<LuaState> L = newStateFor(name, params);
 	
 	for(const auto &var : env) {
 		((std::shared_ptr<LuaType>) var.second)->PushGlobal(*L, var.first);

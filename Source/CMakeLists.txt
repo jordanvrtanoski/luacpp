@@ -37,7 +37,6 @@ set_target_properties(luacpp_static PROPERTIES OUTPUT_NAME luacpp)
 target_link_libraries(luacpp ${LUA_LIBRARIES})
 target_link_libraries(luacpp_static ${LUA_LIBRARIES})
 
-
 ##########
 # Examples
 ##########
@@ -52,12 +51,12 @@ target_link_libraries(example_LuaMetaObject luacpp)
 
 add_custom_command(TARGET example_helloworld POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Example/hello.lua ${PROJECT_BINARY_DIR}/hello.lua
-	COMMENT "${PROJECT_BINARY_DIR}/hello.lua copied to build" 
+	COMMENT "${PROJECT_BINARY_DIR}/hello.lua copied to build"
 )
 
-#########
+########
 # Install
-#########
+########
 include(CMakePackageConfigHelpers)
 
 set(CMAKE_CONFIG_DEST "${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/cmake")
@@ -70,7 +69,7 @@ install(TARGETS luacpp
 install(TARGETS luacpp_static
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES LuaCpp.hpp Lua.hpp LuaContext.hpp LuaMetaObject.hpp LuaVersion.hpp 
+install(FILES LuaCpp.hpp Lua.hpp LuaContext.hpp LuaMetaObject.hpp LuaVersion.hpp
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/Registry ${CMAKE_SOURCE_DIR}/Engine
@@ -98,9 +97,9 @@ install(FILES
 	DESTINATION ${CMAKE_CONFIG_DEST}
 )
 
-#########
+########
 # Testing
-#########
+########
 enable_testing()
 # Install Google test library
 set(GOOGLETEST_INSTALL "${CMAKE_CURRENT_BINARY_DIR}/googletest-install")
@@ -138,6 +137,10 @@ add_dependencies(testLuaMetaObject googletest)
 target_link_libraries(testLuaMetaObject luacpp_static gtest_main gtest pthread)
 gtest_discover_tests(testLuaMetaObject)
 
+add_executable(testLuaContextNewState UnitTest/TestLuaContextNewState.cpp)
+add_dependencies(testLuaContextNewState googletest)
+target_link_libraries(testLuaContextNewState luacpp_static gtest_main gtest pthread)
+gtest_discover_tests(testLuaContextNewState)
 
 #############
 # Memory Test
@@ -147,16 +150,15 @@ find_program(valgrind valgrind)
 if (valgrind)
 	message(STATUS "Found command 'valgrand' => Use target 'test_memory' to perform memory test")
 	add_custom_target( test_memory
-		COMMAND valgrind -v --run-cxx-freeres=yes --run-libc-freeres=yes make test 
+		COMMAND valgrind -v --run-cxx-freeres=yes --run-libc-freeres=yes make test
 	)
 else()
 	message(WARNING "Cannot find command 'valgrand' => Please install package 'valgrand' to run memory tests")
 endif()
 
-
-##########
+########
 # Coverage
-##########
+########
 
 if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
     if( NOT CMAKE_COMPILER_IS_GNUCXX AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
@@ -188,7 +190,7 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
                              --exclude-unreachable-branches
 			     --exclude-throw-branches
             COMMAND echo "To display coverage report: firefox ${CMAKE_BINARY_DIR}/gcovr.html"
-         ) 
+         )
 	add_custom_target (coverage-json
 	    COMMAND make test
             COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}
@@ -200,7 +202,7 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
                              --print-summary
                              --exclude-unreachable-branches
 			     --exclude-throw-branches
-			     --json 
+			     --json
 			     --output coverallis.json
 	)
 	add_custom_target (coverage-cli
@@ -214,7 +216,7 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
                              --print-summary
                              --exclude-unreachable-branches
 			     --exclude-throw-branches
-         ) 
+          )
     else()
 	 message(FATAL_ERROR "Cannot find command 'gcovr' => Please install package 'gcovr' to generate code coverage report (JSON, CLI, HTML)")
     endif()
@@ -224,24 +226,24 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
 	    COMMAND make test
 	    COMMAND echo "======= ${PROJECT_DIR} =============="
             COMMAND ${lcov}  --capture
-	                     --directory        ${CMAKE_BINARY_DIR}
+                     --directory        ${CMAKE_BINARY_DIR}
 			     --base-directory   ${CMAKE_SOURCE_DIR}
                              --output-file      ${CMAKE_BINARY_DIR}/coverage.info
 			     --rc               lcov_branch_coverage=1
-            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '/usr/include/*' 
-	                     --output ${CMAKE_BINARY_DIR}/coverage.info
-            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '*/build/googletest-install/*' 
-	                     --output ${CMAKE_BINARY_DIR}/coverage.info
-            COMMAND ${lcov}  --list   ${CMAKE_BINARY_DIR}/coverage.info 
-         ) 
+            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '/usr/include/*'
+                     --output ${CMAKE_BINARY_DIR}/coverage.info
+            COMMAND ${lcov}  --remove ${CMAKE_BINARY_DIR}/coverage.info '*/build/googletest-install/*'
+                     --output ${CMAKE_BINARY_DIR}/coverage.info
+            COMMAND ${lcov}  --list   ${CMAKE_BINARY_DIR}/coverage.info
+         )
     else()
 	    message(WARNING "Cannot find command 'lcov' => Please install package 'lcov' to generate code coverage report (Coveralls)")
     endif()
 endif()
 
-###########
+##########
 # Documents
-###########
+##########
 option(BUILD_DOC "Build documentation" OFF)
 
 # check if Doxygen is installed

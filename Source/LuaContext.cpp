@@ -54,7 +54,11 @@ std::unique_ptr<LuaState> LuaContext::newState(const LuaEnvironment &env) {
 
 	// push new lua built-in functions to global:
 	for(std::pair<const std::string, LuaCpp::Registry::LuaCFunction> builtInFunction : builtInFunctions)
-	{
+	{	
+		// Check if the CFunction is valid before pushing
+		if (builtInFunction.second.getCFunction() == nullptr) {
+			throw std::runtime_error("Attempted to register a null C function: " + builtInFunction.first);
+		}
 		lua_pushcfunction(*L, builtInFunction.second.getCFunction());
 		lua_setglobal(*L, builtInFunction.first.c_str());
 	}

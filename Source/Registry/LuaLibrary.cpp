@@ -49,25 +49,25 @@ void LuaLibrary::AddCMetaMethod(const std::string &name, lua_CFunction cfunction
 
 void LuaLibrary::AddCMetaMethod(const std::string &name, lua_CFunction cfunction, bool replace)
 {
-	// if we want to replace already existing element, we have to remove old one from list first:
-	if(replace)
-	{
-		metaMethods.erase(name);
-	}
+   // if we want to replace already existing element, we have to remove old one from list first:
+   if(replace)
+   {
+       metaMethods.erase(name);
+   }
 
-	if(!Exists_m(name)) 
-	{
-		std::unique_ptr<LuaCFunction> func = std::make_unique<LuaCFunction>(cfunction);
-		func->setName(name);
-		metaMethods.insert(std::make_pair(name, std::move(*func)));
-	}
+   if(!Exists_m_meta(name))
+   {
+       std::unique_ptr<LuaCFunction> func = std::make_unique<LuaCFunction>(cfunction);
+       func->setName(name);
+       metaMethods.insert(std::make_pair(name, std::move(*func)));
+   }
 }
 
 void LuaLibrary::AddCMethod(const std::string &name, lua_CFunction cfunction) {
 	AddCMethod(name, cfunction, false);
 }
 
-void LuaLibrary::AddCMethod(const std::string &name, lua_CFunction cfunction, bool replace) 
+void LuaLibrary::AddCMethod(const std::string &name, lua_CFunction cfunction, bool replace)
 {
 	// if we want to replace already existing element, we have to remove old one from list first:
 	if(replace)
@@ -84,10 +84,10 @@ void LuaLibrary::AddCMethod(const std::string &name, lua_CFunction cfunction, bo
 }
 
 void LuaLibrary::AddCFunction(const std::string &name, lua_CFunction cfunction) {
-	AddCFunction(name, cfunction, false);	
+	AddCFunction(name, cfunction, false);
 }
 
-void LuaLibrary::AddCFunction(const std::string &name, lua_CFunction cfunction, bool replace) 
+void LuaLibrary::AddCFunction(const std::string &name, lua_CFunction cfunction, bool replace)
 {
 	// if we want to replace already existing element, we have to remove old one from list first:
 	if(replace)
@@ -95,7 +95,7 @@ void LuaLibrary::AddCFunction(const std::string &name, lua_CFunction cfunction, 
 		functions.erase(name);
 	}
 
-	if(!Exists_f(name)) 
+	if(!Exists_f(name))
 	{
 		std::unique_ptr<LuaCFunction> func = std::make_unique<LuaCFunction>(cfunction);
 		func->setName(name);
@@ -108,20 +108,19 @@ lua_CFunction LuaLibrary::getLibMethod(const std::string &name)
 	return methods.at(name).getCFunction();
 }
 
-
 lua_CFunction LuaLibrary::getLibFunction(const std::string &name)
 {
 	return functions.at(name).getCFunction();
 }
 
-int LuaLibrary::RegisterFunctions(LuaState &L) 
+int LuaLibrary::RegisterFunctions(LuaState &L)
 {
 	// delete potentially already existing library:
 	lua_pushnil(L);
 	lua_setglobal(L, name.c_str());
 
 	// Create the metatable and put it on the stack:
-    luaL_newmetatable(L, metaTableName.c_str());
+	luaL_newmetatable(L, metaTableName.c_str());
 
 	// create table of all meta-methods:
 	luaL_Reg arrayMetaMeth[metaMethods.size()+1];
@@ -133,54 +132,49 @@ int LuaLibrary::RegisterFunctions(LuaState &L)
 		arrayMetaMeth[count].func = lcf.getCFunction();
 		count++;
 	}
-	
+
 	arrayMetaMeth[count].name = NULL;
 	arrayMetaMeth[count].func = NULL;
-
-	// create table of all functions:
-	luaL_Reg arraylib_f[functions.size()+1];
-	count = 0;
-
-	for (auto & x : functions) {
-		LuaCFunction& lcf = x.second;
-		arraylib_f[count].name = x.first.c_str();
-		arraylib_f[count].func = lcf.getCFunction();
-		count++;
-	}
-	
-	arraylib_f[count].name = NULL;
-	arraylib_f[count].func = NULL;
-
-	// create table of all methods:
-	luaL_Reg arraylib_m[methods.size()+1];
-	count = 0;
-
-	for (auto & x : methods) {
-		LuaCFunction& lcf = x.second;
-		arraylib_m[count].name = x.first.c_str();
-		arraylib_m[count].func = lcf.getCFunction();
-		count++;
-	}
-	
-	arraylib_m[count].name = NULL;
-	arraylib_m[count].func = NULL;
 
 	// add metamethods to new metatable:
 	luaL_setfuncs(L, arrayMetaMeth, 0);
 
+	// create table of all functions and methods:
+	luaL_Reg arraylib[functions.size() + methods.size() + 1];
+	count = 0;
+
+	// Add functions
+	for (auto & x : functions) {
+		LuaCFunction& lcf = x.second;
+		arraylib[count].name = x.first.c_str();
+		arraylib[count].func = lcf.getCFunction();
+		count++;
+	}
+
+	// Add methods
+	for (auto & x : methods) {
+		LuaCFunction& lcf = x.second;
+		arraylib[count].name = x.first.c_str();
+		arraylib[count].func = lcf.getCFunction();
+		count++;
+	}
+
+	arraylib[count].name = NULL;
+	arraylib[count].func = NULL;
+
 	// create method table:
-	luaL_newlibtable(L, arraylib_m);
+	luaL_newlibtable(L, arraylib);
 
 	// Set the methods to the metatable that should be accessed via object:func:
-    luaL_setfuncs(L, arraylib_m, 0);
+	luaL_setfuncs(L, arraylib, 0);
 
 	// Pop the first metatable off the stack and assign it to __index of the second one:
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);  /* pop metatable */
 
-	// Register the object.func functions into the table that is at the top of the stack:
-	luaL_newlib(L, arraylib_f);
-	lua_setglobal(L,name.c_str());
+	// Register the functions and methods into the global table:
+	luaL_newlib(L, arraylib);
+	lua_setglobal(L, name.c_str());
 
 	return 0;
 }

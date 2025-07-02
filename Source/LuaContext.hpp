@@ -445,7 +445,7 @@ namespace LuaCpp {
 		*
 		* @param library The library containing `C` functions
 		*/
-		void AddLibrary(std::shared_ptr<Registry::LuaLibrary> &library);
+		void AddLibrary(const std::shared_ptr<Registry::LuaLibrary> &library);
 
 		/**
 		 * @brief Add a global variable
@@ -461,7 +461,7 @@ namespace LuaCpp {
 		 * @param name name of the global variable
 		 * @param var the variable
 		 */
-		void AddGlobalVariable(const std::string &name, std::shared_ptr<Engine::LuaType> var);
+		void AddGlobalVariable(const std::string &name, const std::shared_ptr<Engine::LuaType> var);
 
 		/**
 		 * @brief Retrurns the shared pointer to a global variable

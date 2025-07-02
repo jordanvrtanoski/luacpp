@@ -49,6 +49,9 @@ target_link_libraries(example_LuaLibrary luacpp)
 add_executable(example_LuaMetaObject Example/example_LuaMetaObject.cpp)
 target_link_libraries(example_LuaMetaObject luacpp)
 
+add_executable(example_AddCMetaMethod Example/example_AddCMetaMethod.cpp)
+target_link_libraries(example_AddCMetaMethod luacpp)
+
 add_custom_command(TARGET example_helloworld POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Example/hello.lua ${PROJECT_BINARY_DIR}/hello.lua
 	COMMENT "${PROJECT_BINARY_DIR}/hello.lua copied to build"
@@ -141,6 +144,16 @@ add_executable(testLuaContextNewState UnitTest/TestLuaContextNewState.cpp)
 add_dependencies(testLuaContextNewState googletest)
 target_link_libraries(testLuaContextNewState luacpp_static gtest_main gtest pthread)
 gtest_discover_tests(testLuaContextNewState)
+
+add_executable(testLuaContextErrors UnitTest/TestLuaContextErrors.cpp)
+add_dependencies(testLuaContextErrors googletest)
+target_link_libraries(testLuaContextErrors luacpp_static gtest_main gtest pthread)
+gtest_discover_tests(testLuaContextErrors)
+
+add_executable(testLuaLibrary UnitTest/TestLuaLibrary.cpp)
+add_dependencies(testLuaLibrary googletest)
+target_link_libraries(testLuaLibrary luacpp_static gtest_main gtest pthread)
+gtest_discover_tests(testLuaLibrary)
 
 #############
 # Memory Test

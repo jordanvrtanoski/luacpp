@@ -435,6 +435,29 @@ namespace LuaCpp {
 	}
 
 
+	TEST_F(TestLuaContext, getStdLibrary) {
+		LuaContext ctx;
+		std::shared_ptr<Registry::LuaLibrary> lib;
+
+		EXPECT_NO_THROW(lib = ctx.getStdLibrary("os"));
+		EXPECT_TRUE(lib->Exists_f("execute"));
+
+	}
+
+	TEST_F(TestLuaContext, getStdLibrary_io) {
+		LuaContext ctx;
+		std::shared_ptr<Registry::LuaLibrary> lib;
+
+		EXPECT_NO_THROW(lib = ctx.getStdLibrary("io"));
+		EXPECT_TRUE(lib->Exists_f("write"));
+
+	}
+
+	TEST_F(TestLuaContext, getStdFunction) {
+		LuaContext ctx;
+
+		EXPECT_NE(nullptr, ctx.getBuiltInFnc("tonumber"));
+	}
 
 	TEST_F(TestLuaContext, TestGlobalVariables) {
 		LuaContext ctx;

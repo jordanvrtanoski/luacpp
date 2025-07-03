@@ -54,7 +54,11 @@ std::unique_ptr<LuaState> LuaContext::newState(const LuaEnvironment &env) {
 
 	// push new lua built-in functions to global:
 	for(std::pair<const std::string, LuaCpp::Registry::LuaCFunction> builtInFunction : builtInFunctions)
-	{
+	{	
+		// Check if the CFunction is valid before pushing
+		if (builtInFunction.second.getCFunction() == nullptr) {
+			throw std::runtime_error("Attempted to register a null C function: " + builtInFunction.first);
+		}
 		lua_pushcfunction(*L, builtInFunction.second.getCFunction());
 		lua_setglobal(*L, builtInFunction.first.c_str());
 	}
@@ -136,7 +140,7 @@ void LuaContext::Run(const std::string &name) {
 }
 
 void LuaContext::RunWithEnvironment(const std::string &name, const LuaEnvironment &env) {
-	std::unique_ptr<LuaState> L = newStateFor(name);
+	std::unique_ptr<LuaState> L = newStateFor(name, env);
 	
 	for(const auto &var : env) {
 		((std::shared_ptr<LuaType>) var.second)->PushGlobal(*L, var.first);
@@ -271,16 +275,27 @@ bool LuaContext::Exists_buildInFnc(Engine::LuaState &L, const std::string &fncNa
 	return !(builtInFunctions.find( fncName ) == builtInFunctions.end()) || (!lua_isnil(L, -1));
 }
 		
-void LuaContext::AddLibrary(std::shared_ptr<Registry::LuaLibrary> &library) {
-	libraries[library->getName()] = std::move(library);
+void LuaContext::AddLibrary(const std::shared_ptr<Registry::LuaLibrary> &library) {
+		if (!library) {
+			throw std::invalid_argument("Library cannot be null");
+		}
+		this->libraries[library->getName()] = library;	
 }
 
-void LuaContext::AddGlobalVariable(const std::string &name, std::shared_ptr<Engine::LuaType> var) {
+void LuaContext::AddGlobalVariable(const std::string &name, const std::shared_ptr<Engine::LuaType> var) {
+	if (!var) {
+		throw std::invalid_argument("Variable cannot be null");
+	}
 	globalEnvironment[name] = std::move(var);
 }
 
 std::shared_ptr<Engine::LuaType> &LuaContext::getGlobalVariable(const std::string &name) {
-	return globalEnvironment[name];
+    auto it = globalEnvironment.find(name);
+    if (it == globalEnvironment.end()) {
+        static std::shared_ptr<Engine::LuaType> nullPtr = nullptr;
+        return nullPtr;
+    }
+    return it->second;
 }
 
 void LuaContext::addHook(lua_Hook hookFunc, const std::string &hookType, const int count)

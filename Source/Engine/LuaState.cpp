@@ -32,6 +32,11 @@ LuaState::LuaState() {
 	L = luaL_newstate();
 }
 
+LuaState::LuaState(StateParams params) {
+   shared = false;
+   L = lua_newstate(params.allocator, params.userData);
+}
+
 LuaState::~LuaState() {
 	if (!shared) {
 		lua_close(L);

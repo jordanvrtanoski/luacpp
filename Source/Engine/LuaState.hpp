@@ -37,6 +37,14 @@ namespace LuaCpp {
 	namespace Engine {
 
 		/**
+		 * @brief Parameters for creating a Lua state with a custom allocator
+		 */
+		struct StateParams final {
+			lua_Alloc allocator = nullptr;
+			void* userData = nullptr;
+		};
+
+		/**
 		 * @brief Wrapper of `struct lua_State` defined in the Lua library
 		 *
 		 * @details
@@ -59,6 +67,8 @@ namespace LuaCpp {
 			 * one the instance is destroyed.
 			 */
 			explicit LuaState();
+
+			explicit LuaState(StateParams params);
 
 			/**
 			 * @brief Constructor that creates a new state

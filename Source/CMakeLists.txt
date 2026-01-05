@@ -284,3 +284,38 @@ if (DOXYGEN_FOUND)
 else (DOXYGEN_FOUND)
   message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)
+
+##########
+# Modules
+##########
+option(LUACPP_BUILD_MODULES "Build C++ modules" OFF)
+
+if(LUACPP_BUILD_MODULES)
+    add_library(luacpp_module)
+
+    target_sources(luacpp_module
+        PUBLIC
+            FILE_SET CXX_MODULES FILES
+                LuaCpp.cppm
+    )
+
+    target_compile_features(luacpp_module PUBLIC cxx_std_20)
+
+    target_include_directories(luacpp_module PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
+    )
+
+    target_link_libraries(luacpp_module PUBLIC ${LUA_LIBRARIES})
+
+    add_library(LuaCpp::module ALIAS luacpp_module)
+
+    # Installation
+    install(TARGETS luacpp_module
+        EXPORT LuaCppTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+    )
+endif()

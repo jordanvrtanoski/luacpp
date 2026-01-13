@@ -13,9 +13,9 @@
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 
-### Dependancies
+### Dependencies
 - [ ] Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] Introduced additional dependancies (ex. libraries, tools, etc.)
+- [ ] Introduced additional dependencies (ex. libraries, tools, etc.)
 
 <!--- Add the list of PRs that this PR depends on -->
 

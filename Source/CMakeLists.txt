@@ -104,56 +104,82 @@ install(FILES
 # Testing
 ########
 enable_testing()
-# Install Google test library
-set(GOOGLETEST_INSTALL "${CMAKE_CURRENT_BINARY_DIR}/googletest-install")
-set(GOOGLETEST_INCLUDE "${GOOGLETEST_INSTALL}/include")
-include(ExternalProject)
-ExternalProject_Add(googletest
-  GIT_REPOSITORY    https://github.com/google/googletest.git
-  GIT_TAG           main
-  SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-src"
-  BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
-  CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${GOOGLETEST_INSTALL} -DINCLUDE_INSTALL_DIR=${GOOGLETEST_INSTALL}
-  TEST_COMMAND      ""
-)
-link_directories(${GOOGLETEST_INSTALL}/lib)
-include_directories(${GOOGLETEST_INSTALL}/include)
-include(GoogleTest)
 
-add_executable(testLuaContext UnitTest/TestLuaContext.cpp)
-add_dependencies(testLuaContext googletest)
-target_link_libraries(testLuaContext luacpp_static gtest_main gtest pthread)
-gtest_discover_tests(testLuaContext)
+# Check if GTest is already available from parent project
+if(TARGET GTest::gtest_main OR TARGET gtest_main)
+  message(STATUS "LuaCpp: Using parent project's Google Test")
+  include(GoogleTest)
 
-add_executable(testLuaTypes UnitTest/TestLuaTypes.cpp)
-add_dependencies(testLuaTypes googletest)
-target_link_libraries(testLuaTypes luacpp_static gtest_main gtest pthread)
-gtest_discover_tests(testLuaTypes)
+  # Helper function to add test executables
+  function(add_luacpp_test test_name source_file)
+    add_executable(${test_name} ${source_file})
+    if(TARGET GTest::gtest_main)
+      target_link_libraries(${test_name} luacpp_static GTest::gtest_main pthread)
+    else()
+      target_link_libraries(${test_name} luacpp_static gtest_main pthread)
+    endif()
+    gtest_discover_tests(${test_name})
+  endfunction()
 
-add_executable(testLuaCompiler UnitTest/TestLuaCompiler.cpp)
-add_dependencies(testLuaCompiler googletest)
-target_link_libraries(testLuaCompiler luacpp_static gtest_main gtest pthread)
-gtest_discover_tests(testLuaCompiler)
+  add_luacpp_test(testLuaContext UnitTest/TestLuaContext.cpp)
+  add_luacpp_test(testLuaTypes UnitTest/TestLuaTypes.cpp)
+  add_luacpp_test(testLuaCompiler UnitTest/TestLuaCompiler.cpp)
+  add_luacpp_test(testLuaMetaObject UnitTest/TestLuaMetaObject.cpp)
+  add_luacpp_test(testLuaContextNewState UnitTest/TestLuaContextNewState.cpp)
+  add_luacpp_test(testLuaContextErrors UnitTest/TestLuaContextErrors.cpp)
+  add_luacpp_test(testLuaLibrary UnitTest/TestLuaLibrary.cpp)
+else()
+  # Install Google test library (standalone build)
+  set(GOOGLETEST_INSTALL "${CMAKE_CURRENT_BINARY_DIR}/googletest-install")
+  set(GOOGLETEST_INCLUDE "${GOOGLETEST_INSTALL}/include")
+  include(ExternalProject)
+  ExternalProject_Add(googletest
+    GIT_REPOSITORY    https://github.com/google/googletest.git
+    GIT_TAG           v1.14.0
+    SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-src"
+    BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
+    CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${GOOGLETEST_INSTALL} -DINCLUDE_INSTALL_DIR=${GOOGLETEST_INSTALL}
+    TEST_COMMAND      ""
+  )
+  link_directories(${GOOGLETEST_INSTALL}/lib)
+  include_directories(${GOOGLETEST_INSTALL}/include)
+  include(GoogleTest)
 
-add_executable(testLuaMetaObject UnitTest/TestLuaMetaObject.cpp)
-add_dependencies(testLuaMetaObject googletest)
-target_link_libraries(testLuaMetaObject luacpp_static gtest_main gtest pthread)
-gtest_discover_tests(testLuaMetaObject)
+  add_executable(testLuaContext UnitTest/TestLuaContext.cpp)
+  add_dependencies(testLuaContext googletest)
+  target_link_libraries(testLuaContext luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testLuaContext)
 
-add_executable(testLuaContextNewState UnitTest/TestLuaContextNewState.cpp)
-add_dependencies(testLuaContextNewState googletest)
-target_link_libraries(testLuaContextNewState luacpp_static gtest_main gtest pthread)
-gtest_discover_tests(testLuaContextNewState)
+  add_executable(testLuaTypes UnitTest/TestLuaTypes.cpp)
+  add_dependencies(testLuaTypes googletest)
+  target_link_libraries(testLuaTypes luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testLuaTypes)
 
-add_executable(testLuaContextErrors UnitTest/TestLuaContextErrors.cpp)
-add_dependencies(testLuaContextErrors googletest)
-target_link_libraries(testLuaContextErrors luacpp_static gtest_main gtest pthread)
-gtest_discover_tests(testLuaContextErrors)
+  add_executable(testLuaCompiler UnitTest/TestLuaCompiler.cpp)
+  add_dependencies(testLuaCompiler googletest)
+  target_link_libraries(testLuaCompiler luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testLuaCompiler)
 
-add_executable(testLuaLibrary UnitTest/TestLuaLibrary.cpp)
-add_dependencies(testLuaLibrary googletest)
-target_link_libraries(testLuaLibrary luacpp_static gtest_main gtest pthread)
-gtest_discover_tests(testLuaLibrary)
+  add_executable(testLuaMetaObject UnitTest/TestLuaMetaObject.cpp)
+  add_dependencies(testLuaMetaObject googletest)
+  target_link_libraries(testLuaMetaObject luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testLuaMetaObject)
+
+  add_executable(testLuaContextNewState UnitTest/TestLuaContextNewState.cpp)
+  add_dependencies(testLuaContextNewState googletest)
+  target_link_libraries(testLuaContextNewState luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testLuaContextNewState)
+
+  add_executable(testLuaContextErrors UnitTest/TestLuaContextErrors.cpp)
+  add_dependencies(testLuaContextErrors googletest)
+  target_link_libraries(testLuaContextErrors luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testLuaContextErrors)
+
+  add_executable(testLuaLibrary UnitTest/TestLuaLibrary.cpp)
+  add_dependencies(testLuaLibrary googletest)
+  target_link_libraries(testLuaLibrary luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testLuaLibrary)
+endif()
 
 #############
 # Memory Test

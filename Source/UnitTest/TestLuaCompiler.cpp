@@ -53,7 +53,7 @@ using namespace LuaCpp::Engine;
 using namespace LuaCpp::Registry;
 
 // Fixture for the test of the internal library function
-int _checkErrorAndThrow(LuaState &L, int error);
+void _checkErrorAndThrow(LuaState &L, int error);
 
 namespace LuaCpp {
 

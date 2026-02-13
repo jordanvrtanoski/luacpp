@@ -30,7 +30,7 @@
 using namespace LuaCpp::Registry;
 using namespace LuaCpp::Engine;
 
-void inline _checkErrorAndThrow(LuaState &L, int error) {
+void _checkErrorAndThrow(LuaState &L, int error) {
 	if (error != LUA_OK) {
 		switch (error) {
 			case LUA_ERRMEM:

@@ -96,9 +96,9 @@ namespace LuaCpp {
 
 		std::unique_ptr<Engine::LuaState> L = ctx.newState();
 
-		EXPECT_NE((Engine::LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
-		EXPECT_NE((const char *) NULL, lua_pushstring(*L, "test"));
+		EXPECT_NE(nullptr, lua_pushstring(*L, "test"));
 		EXPECT_EQ(1, lua_gettop(*L));
 	}
 
@@ -119,9 +119,9 @@ namespace LuaCpp {
 
 		std::unique_ptr<Engine::LuaState> L = ctx.newState();
 
-		EXPECT_NE((Engine::LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
-		EXPECT_NE((const char *) NULL, lua_pushstring(*L, "test"));
+		EXPECT_NE(nullptr, lua_pushstring(*L, "test"));
 		EXPECT_EQ(1, lua_gettop(*L));
 
 		// Reuse the state
@@ -239,13 +239,13 @@ namespace LuaCpp {
 		testing::internal::CaptureStdout();
 
 		EXPECT_NO_THROW(ctx.CompileString("test", "print('Hello World from Lua, v1.0')"));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 
 		EXPECT_NO_THROW(ctx.CompileString("test", "print('Hello World from Lua, v2.0')"));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 	
 		EXPECT_NO_THROW(ctx.CompileString("test", "print('Hello World from Lua, v3.0')"));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 		
 		EXPECT_NO_THROW(ctx.Run("test"));
 		
@@ -266,13 +266,13 @@ namespace LuaCpp {
 		testing::internal::CaptureStdout();
 
 		EXPECT_NO_THROW(ctx.CompileString("test", "print('Hello World from Lua, v1.0')", true));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 
 		EXPECT_NO_THROW(ctx.CompileString("test", "print('Hello World from Lua, v2.0')", true));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 	
 		EXPECT_NO_THROW(ctx.CompileString("test", "print('Hello World from Lua, v3.0')", true));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 		
 		EXPECT_NO_THROW(ctx.Run("test"));
 		
@@ -320,13 +320,13 @@ namespace LuaCpp {
 		testing::internal::CaptureStdout();
 
 		EXPECT_NO_THROW(ctx.CompileFile("test", "TestLuaContext_3_v1.lua"));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 
 		EXPECT_NO_THROW(ctx.CompileFile("test", "TestLuaContext_3_v2.lua"));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 	
 		EXPECT_NO_THROW(ctx.CompileFile("test", "TestLuaContext_3_v3.lua"));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 		
 		EXPECT_NO_THROW(ctx.Run("test"));
 		
@@ -347,13 +347,13 @@ namespace LuaCpp {
 		testing::internal::CaptureStdout();
 
 		EXPECT_NO_THROW(ctx.CompileFile("test", "TestLuaContext_3_v1.lua", true));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 
 		EXPECT_NO_THROW(ctx.CompileFile("test", "TestLuaContext_3_v2.lua", true));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 	
 		EXPECT_NO_THROW(ctx.CompileFile("test", "TestLuaContext_3_v3.lua", true));
-		EXPECT_NE((Engine::LuaState *) NULL, ctx.newStateFor("test").get());
+		EXPECT_NE(nullptr, ctx.newStateFor("test").get());
 		
 		EXPECT_NO_THROW(ctx.Run("test"));
 		
@@ -474,7 +474,7 @@ namespace LuaCpp {
 	
 		EXPECT_EQ("testing 1,2,3\n", output);
 		EXPECT_EQ("changed", str->getValue());
-		EXPECT_NE((void *) NULL, (void *) &ctx.getGlobalVariable("test_str"));
+		EXPECT_NE(nullptr, &ctx.getGlobalVariable("test_str"));
 		std::shared_ptr<Engine::LuaTString> str2 = std::static_pointer_cast<Engine::LuaTString>(ctx.getGlobalVariable("test_str"));
 		EXPECT_EQ("changed", str2->getValue());
 
@@ -499,7 +499,7 @@ namespace LuaCpp {
 	
 		EXPECT_EQ("testing 1,2,3\n", output);
 		EXPECT_EQ("changed", str->getValue());
-		EXPECT_EQ((void *) NULL, (void *) &(*ctx.getGlobalVariable("test_str")));
+		EXPECT_EQ(nullptr, &(*ctx.getGlobalVariable("test_str")));
 
 	}
 

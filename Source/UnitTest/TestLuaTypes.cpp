@@ -80,9 +80,9 @@ namespace LuaCpp {
 
 		std::unique_ptr<LuaState> L = ctx.newState();
 
-		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
-		EXPECT_NE((const char *) NULL, lua_pushstring(*L, "test"));
+		EXPECT_NE(nullptr, lua_pushstring(*L, "test"));
 		EXPECT_EQ(1, lua_gettop(*L));
 	}
 
@@ -101,7 +101,7 @@ namespace LuaCpp {
 		EXPECT_EQ("nil", nil.getTypeName(*L));
 
 		// Assure the state is prepared for testing
-		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
 
 		// Assure pushing the value
@@ -116,7 +116,7 @@ namespace LuaCpp {
 		EXPECT_NO_THROW(nil.PopValue(*L, 1));
 
 		// Push new value on stacks
-		EXPECT_NE((const char *) NULL, lua_pushstring(*L, "test"));
+		EXPECT_NE(nullptr, lua_pushstring(*L, "test"));
 
 		// Assure popping the value in relative referencing
 		EXPECT_THROW(nil.PopValue(*L, -1), std::invalid_argument);
@@ -143,7 +143,7 @@ namespace LuaCpp {
 		EXPECT_EQ("string", str.getTypeName(*L));
 
 		// Assure the state is prepared for testing
-		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
 
 		// Assure pushing the value
@@ -195,7 +195,7 @@ namespace LuaCpp {
 		EXPECT_EQ("number", num.getTypeName(*L));
 
 		// Assure the state is prepared for testing
-		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
 
 		// Assure pushing the value
@@ -247,7 +247,7 @@ namespace LuaCpp {
 		EXPECT_EQ("boolean", bol.getTypeName(*L));
 
 		// Assure the state is prepared for testing
-		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
 
 		// Assure pushing the value
@@ -320,7 +320,7 @@ namespace LuaCpp {
 		EXPECT_EQ("table", tbl.getTypeName(*L));
 
 		// Assure the state is prepared for testing
-		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
 
 		// Assure pushing the value
@@ -379,7 +379,7 @@ namespace LuaCpp {
 		EXPECT_EQ("table", tbl.getTypeName(*L));
 
 		// Assure the state is prepared for testing
-		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
 
 		// Assure pushing the value
@@ -438,7 +438,7 @@ namespace LuaCpp {
 		EXPECT_EQ("table", tbl.getTypeName(*L));
 
 		// Assure the state is prepared for testing
-		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
 
 		// Assure pushing the value
@@ -693,7 +693,7 @@ namespace LuaCpp {
 		EXPECT_EQ("userdata", ud.getTypeName(*L));
 
 		// Assure the state is prepared for testing
-		EXPECT_NE((LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
 
 		EXPECT_EQ("userdata", ud.ToString());
@@ -702,15 +702,15 @@ namespace LuaCpp {
 		EXPECT_NO_THROW(ud.PushValue(*L));
 		EXPECT_EQ(1, lua_gettop(*L));
 		EXPECT_EQ(LUA_TUSERDATA, lua_type(*L, -1));
-		EXPECT_NE((void *) NULL, ud.getRawUserData());
+		EXPECT_NE(nullptr, ud.getRawUserData());
 
 		// Assure popping the value in relative referencing
 		EXPECT_NO_THROW(ud.PopValue(*L, -1));
-		EXPECT_NE((void *) NULL, ud.getRawUserData());
+		EXPECT_NE(nullptr, ud.getRawUserData());
 
 		// Assure pooping the value with absolute referencing
 		EXPECT_NO_THROW(ud.PopValue(*L, 1));
-		EXPECT_NE((void *) NULL, ud.getRawUserData());
+		EXPECT_NE(nullptr, ud.getRawUserData());
 
 		// Push new value on stacks
 		lua_pushnil(*L);

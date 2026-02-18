@@ -43,7 +43,7 @@ namespace LuaCpp {
 
         // Test newState() without parameters
         std::unique_ptr<Engine::LuaState> L = ctx.newState();
-        EXPECT_NE((Engine::LuaState *) NULL, L.get());
+        EXPECT_NE(nullptr, L.get());
 
         // Test newState() with environment
         LuaEnvironment env;
@@ -51,7 +51,7 @@ namespace LuaCpp {
         env["test_str"] = str;
 
         std::unique_ptr<Engine::LuaState> L2 = ctx.newState(env);
-        EXPECT_NE((Engine::LuaState *) NULL, L2.get());
+        EXPECT_NE(nullptr, L2.get());
 
         // Verify that the global variable is set in the new state
         lua_getglobal(*L2, "test_str");

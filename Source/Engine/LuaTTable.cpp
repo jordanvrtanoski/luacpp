@@ -29,6 +29,7 @@
 #include "LuaTString.hpp"
 #include "LuaTNumber.hpp"
 #include "LuaTBoolean.hpp"
+#include "LuaTNil.hpp"
 
 using namespace LuaCpp::Engine;
 using namespace LuaCpp::Engine::Table;
@@ -204,7 +205,12 @@ std::map<Table::Key, std::shared_ptr<LuaType>> LuaTTable::getValues() const {
 }
 
 LuaType &LuaTTable::getValue(Table::Key key) {
-	return *table[key];
+	auto it = table.find(key);
+	if (it == table.end()) {
+		static LuaTNil nilPlaceholder;
+		return nilPlaceholder;
+	}
+	return *(it->second);
 }
 
 void LuaTTable::setValue(Table::Key key, std::shared_ptr<LuaType> value) {

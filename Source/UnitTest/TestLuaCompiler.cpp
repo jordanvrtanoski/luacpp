@@ -92,9 +92,9 @@ namespace LuaCpp {
 
 		std::unique_ptr<Engine::LuaState> L = ctx.newState();
 
-		EXPECT_NE((Engine::LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
-		EXPECT_NE((const char *) NULL, lua_pushstring(*L, "test"));
+		EXPECT_NE(nullptr, lua_pushstring(*L, "test"));
 		EXPECT_EQ(1, lua_gettop(*L));
 
 

@@ -100,9 +100,9 @@ namespace LuaCpp {
 		std::shared_ptr<MetaMap> mm = std::make_shared<MetaMap>();
 		std::shared_ptr<MetaMap> aa = std::make_shared<MetaMap>();
 
-		EXPECT_NE((Engine::LuaState *) NULL, L.get());
+		EXPECT_NE(nullptr, L.get());
 		EXPECT_EQ(0, lua_gettop(*L));
-		EXPECT_NE((const char *) NULL, lua_pushstring(*L, "test"));
+		EXPECT_NE(nullptr, lua_pushstring(*L, "test"));
 		EXPECT_EQ(1, lua_gettop(*L));
 
 		EXPECT_NO_THROW(ctx.AddGlobalVariable("mm", mm));

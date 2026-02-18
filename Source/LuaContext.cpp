@@ -184,7 +184,7 @@ void LuaContext::RunWithEnvironment(const std::string &name, const LuaEnvironmen
 
 std::shared_ptr<Registry::LuaLibrary> LuaContext::getStdLibrary(const std::string &libName)
 {
-	std::shared_ptr<LuaLibrary> foundLibrary = NULL;
+	std::shared_ptr<LuaLibrary> foundLibrary = nullptr;
 	std::unique_ptr<LuaCpp::Engine::LuaState> L = newState(globalEnvironment);
 	lua_getglobal(*L, libName.c_str());
 
@@ -247,7 +247,7 @@ std::shared_ptr<Registry::LuaLibrary> LuaContext::getStdLibrary(const std::strin
 
 std::shared_ptr<Registry::LuaCFunction> LuaContext::getBuiltInFnc(const std::string &fncName)
 {
-	std::shared_ptr<Registry::LuaCFunction> builtInFnc = NULL;
+	std::shared_ptr<Registry::LuaCFunction> builtInFnc = nullptr;
 	std::unique_ptr<LuaCpp::Engine::LuaState> L = newState(globalEnvironment);
 
 	lua_getglobal(*L, fncName.c_str());

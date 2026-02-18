@@ -32,6 +32,8 @@
 #include "Registry/LuaLibrary.hpp"
 #include "Engine/LuaState.hpp"
 #include "Engine/LuaType.hpp"
+#include "Engine/PoolManager.hpp"
+#include "Engine/PooledState.hpp"
 
 namespace LuaCpp {
 	/**
@@ -97,6 +99,11 @@ namespace LuaCpp {
 		 *
 		 */
 		std::map<std::string, LuaCpp::Registry::LuaCFunction> builtInFunctions;
+
+		/**
+		 * @brief Pool manager for state pooling
+		 */
+		mutable std::unique_ptr<Engine::PoolManager> poolManager_;
 
 	public:
 
@@ -502,10 +509,119 @@ namespace LuaCpp {
 		void addHook(lua_Hook hookFunc, const std::string &hookType, const int count = 0);
 
 		void registerHooks(LuaCpp::Engine::LuaState &L);
+
+		// =====================
+		// Pooling Methods
+		// =====================
+
+		/**
+		 * @brief Get the pool manager
+		 *
+		 * @details
+		 * Returns a reference to the pool manager. The pool manager
+		 * is lazily initialized on first access.
+		 *
+		 * @return Reference to the PoolManager
+		 */
+		Engine::PoolManager& getPoolManager();
+
+		/**
+		 * @brief Get a pool by color
+		 *
+		 * @details
+		 * Convenience method to get a pool by color name.
+		 *
+		 * @param color The pool color name
+		 * @return Reference to the StatePool
+		 */
+		Engine::StatePool& getPool(const std::string& color = "default");
+
+		/**
+		 * @brief Check if a pool exists
+		 *
+		 * @param color The pool color name
+		 * @return true if the pool exists
+		 */
+		bool hasPool(const std::string& color);
+
+		/**
+		 * @brief Create a custom pool
+		 *
+		 * @details
+		 * Creates a new pool with the specified configuration.
+		 * Throws if the pool already exists.
+		 *
+		 * @param color The pool color name
+		 * @param config The pool configuration
+		 * @return Reference to the created StatePool
+		 */
+		Engine::StatePool& createPool(const std::string& color, const Engine::PoolConfig& config);
+
+		/**
+		 * @brief Run a snippet using a pooled state
+		 *
+		 * @details
+		 * Acquires a state from the specified pool, executes the snippet,
+		 * and returns the state to the pool automatically.
+		 *
+		 * @param name Name of the snippet to execute
+		 * @param color The pool color (default: "default")
+		 */
+		void RunPooled(const std::string& name, const std::string& color = "default");
+
+		/**
+		 * @brief Run a snippet with environment using a pooled state
+		 *
+		 * @details
+		 * Acquires a state from the specified pool, executes the snippet
+		 * with the provided environment, and returns the state to the pool.
+		 *
+		 * @param name Name of the snippet to execute
+		 * @param env Environment variables for the execution
+		 * @param color The pool color (default: "default")
+		 */
+		void RunWithEnvironmentPooled(const std::string& name, const LuaEnvironment& env, const std::string& color = "default");
+
+		/**
+		 * @brief Acquire a state from the pool for manual use
+		 *
+		 * @details
+		 * Checks out a state from the pool. The caller is responsible
+		 * for calling ReleasePooledState when done with the state.
+		 *
+		 * @param color The pool color (default: "default")
+		 * @return Unique pointer to the LuaState
+		 */
+		std::unique_ptr<Engine::LuaState> AcquirePooledState(const std::string& color = "default");
+
+		/**
+		 * @brief Release a state back to the pool
+		 *
+		 * @details
+		 * Returns a previously acquired state to the pool.
+		 *
+		 * @param state The state to release
+		 * @param color The pool color (default: "default")
+		 */
+		void ReleasePooledState(std::unique_ptr<Engine::LuaState> state, const std::string& color = "default");
+
+		/**
+		 * @brief Acquire a pooled state with RAII semantics
+		 *
+		 * @details
+		 * Returns a PooledState wrapper that automatically returns
+		 * the state to the pool when it goes out of scope.
+		 *
+		 * @param color The pool color (default: "default")
+		 * @return PooledState wrapper
+		 */
+		Engine::PooledState AcquirePooledStateRAII(const std::string& color = "default");
 	};
 }
 
 /**
  * @example example_helloworld.cpp
+ * @example example_StatePool.cpp
+ * @example example_StatePoolAdvanced.cpp
  */
 #endif // LUACPP_LUACONTEXT_HPP

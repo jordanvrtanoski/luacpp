@@ -182,6 +182,79 @@ int main(int argc, char **argv) {
 ```
 
 
+## State Pooling for High Performance
+
+For high-performance scenarios where Lua scripts are executed frequently, LuaCpp provides state pooling. Instead of creating a new Lua state for each execution (which involves memory allocation and library loading), states are reused from a pool.
+
+### Quick Example
+
+The simplest way to use pooling is with `RunPooled()`:
+
+```c++
+#include <LuaCpp.hpp>
+#include <iostream>
+
+using namespace LuaCpp;
+
+int main(int argc, char **argv) {
+	LuaContext ctx;
+
+	// Compile a script
+	ctx.CompileString("hello", "print('Hello from pooled state!')");
+
+	// Execute using a pooled state
+	// State is automatically acquired and returned to pool
+	try {
+		ctx.RunPooled("hello");
+	}
+	catch (std::runtime_error& e) {
+		std::cout << e.what() << '\n';
+	}
+}
+```
+
+### Pool Colors
+
+LuaCpp provides predefined pool configurations called "colors":
+
+| Color | Libraries | Use Case |
+|-------|-----------|----------|
+| `"default"` | All standard | General scripting |
+| `"sandboxed"` | base, math, string, table | Safe execution |
+| `"minimal"` | base only | Maximum performance |
+| `"io"` | base, io, os | File operations |
+
+```c++
+// Use different pools for different requirements
+ctx.RunPooled("untrusted_code", "sandboxed");  // No io/os access
+ctx.RunPooled("file_operation", "io");         // Has io and os
+```
+
+### Custom Pools
+
+Create pools with specific library configurations:
+
+```c++
+LuaContext ctx;
+
+PoolConfig config;
+config.libraries = {"base", "math"};
+config.maxSize = 3;
+
+ctx.createPool("math_only", config);
+ctx.RunPooled("calculation", "math_only");
+```
+
+### Performance Benefits
+
+| Scenario | Without Pooling | With Pooling |
+|----------|-----------------|--------------|
+| 100 sequential executions | ~100 state creations | 1-5 state creations |
+| High-frequency scripting | Allocation per call | Amortized allocation |
+
+For complete documentation, see [State Pooling](2-state-pooling.md).
+
+
 ## Installing
 
 Clone the project and from the root of the project, invoke:

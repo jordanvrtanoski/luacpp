@@ -16,6 +16,10 @@ set(SOURCE_FILES
 	Engine/LuaTBoolean.cpp Engine/LuaTBoolean.hpp
 	Engine/LuaTTable.cpp Engine/LuaTTable.hpp
 	Engine/LuaTUserData.cpp Engine/LuaTUserData.hpp
+	Engine/StatePool.cpp Engine/StatePool.hpp
+	Engine/PoolConfig.hpp
+	Engine/PoolManager.cpp Engine/PoolManager.hpp
+	Engine/PooledState.hpp
 	Registry/LuaRegistry.cpp Registry/LuaRegistry.hpp
 	Registry/LuaCodeSnippet.cpp Registry/LuaCodeSnippet.hpp
 	Registry/LuaCompiler.cpp Registry/LuaCompiler.hpp
@@ -51,6 +55,12 @@ target_link_libraries(example_LuaMetaObject luacpp)
 
 add_executable(example_AddCMetaMethod Example/example_AddCMetaMethod.cpp)
 target_link_libraries(example_AddCMetaMethod luacpp)
+
+add_executable(example_StatePool Example/example_StatePool.cpp)
+target_link_libraries(example_StatePool luacpp)
+
+add_executable(example_StatePoolAdvanced Example/example_StatePoolAdvanced.cpp)
+target_link_libraries(example_StatePoolAdvanced luacpp pthread)
 
 add_custom_command(TARGET example_helloworld POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Example/hello.lua ${PROJECT_BINARY_DIR}/hello.lua
@@ -128,6 +138,9 @@ if(TARGET GTest::gtest_main OR TARGET gtest_main)
   add_luacpp_test(testLuaContextNewState UnitTest/TestLuaContextNewState.cpp)
   add_luacpp_test(testLuaContextErrors UnitTest/TestLuaContextErrors.cpp)
   add_luacpp_test(testLuaLibrary UnitTest/TestLuaLibrary.cpp)
+  add_luacpp_test(testStatePool UnitTest/TestStatePool.cpp)
+  add_luacpp_test(testPoolManager UnitTest/TestPoolManager.cpp)
+  add_luacpp_test(testLuaContextPooling UnitTest/TestLuaContextPooling.cpp)
 else()
   # Install Google test library (standalone build)
   set(GOOGLETEST_INSTALL "${CMAKE_CURRENT_BINARY_DIR}/googletest-install")
@@ -179,6 +192,21 @@ else()
   add_dependencies(testLuaLibrary googletest)
   target_link_libraries(testLuaLibrary luacpp_static gtest_main gtest pthread)
   gtest_discover_tests(testLuaLibrary)
+
+  add_executable(testStatePool UnitTest/TestStatePool.cpp)
+  add_dependencies(testStatePool googletest)
+  target_link_libraries(testStatePool luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testStatePool)
+
+  add_executable(testPoolManager UnitTest/TestPoolManager.cpp)
+  add_dependencies(testPoolManager googletest)
+  target_link_libraries(testPoolManager luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testPoolManager)
+
+  add_executable(testLuaContextPooling UnitTest/TestLuaContextPooling.cpp)
+  add_dependencies(testLuaContextPooling googletest)
+  target_link_libraries(testLuaContextPooling luacpp_static gtest_main gtest pthread)
+  gtest_discover_tests(testLuaContextPooling)
 endif()
 
 #############
@@ -219,27 +247,27 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
             COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}
                              --exclude          ${CMAKE_SOURCE_DIR}/3rdparty
 			     --exclude          ${CMAKE_SOURCE_DIR}/Example
-                             --exclude          ${CMAKE_BINARY_DIR}
-                             --object-directory ${CMAKE_BINARY_DIR}
-                             --output           ${CMAKE_BINARY_DIR}/gcovr.html
-                             --html
-                             --html-details
-                             --sort-uncovered
-                             --print-summary
-                             --exclude-unreachable-branches
+                              --exclude          ${CMAKE_BINARY_DIR}
+                              --object-directory ${CMAKE_BINARY_DIR}
+                              --output           ${CMAKE_BINARY_DIR}/gcovr.html
+                              --html
+                              --html-details
+                              --sort-uncovered
+                              --print-summary
+                              --exclude-unreachable-branches
 			     --exclude-throw-branches
             COMMAND echo "To display coverage report: firefox ${CMAKE_BINARY_DIR}/gcovr.html"
-         )
+          )
 	add_custom_target (coverage-json
 	    COMMAND make test
             COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}
                              --exclude          ${CMAKE_SOURCE_DIR}/3rdparty
 			     --exclude          ${CMAKE_SOURCE_DIR}/Example
-                             --exclude          ${CMAKE_BINARY_DIR}
-                             --object-directory ${CMAKE_BINARY_DIR}
-                             --sort-uncovered
-                             --print-summary
-                             --exclude-unreachable-branches
+                              --exclude          ${CMAKE_BINARY_DIR}
+                              --object-directory ${CMAKE_BINARY_DIR}
+                              --sort-uncovered
+                              --print-summary
+                              --exclude-unreachable-branches
 			     --exclude-throw-branches
 			     --json
 			     --output coverallis.json
@@ -249,11 +277,11 @@ if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
             COMMAND ${gcovr} --root             ${CMAKE_SOURCE_DIR}
                              --exclude          ${CMAKE_SOURCE_DIR}/3rdparty
 			     --exclude          ${CMAKE_SOURCE_DIR}/Example
-                             --exclude          ${CMAKE_BINARY_DIR}
-                             --object-directory ${CMAKE_BINARY_DIR}
-                             --sort-uncovered
-                             --print-summary
-                             --exclude-unreachable-branches
+                              --exclude          ${CMAKE_BINARY_DIR}
+                              --object-directory ${CMAKE_BINARY_DIR}
+                              --sort-uncovered
+                              --print-summary
+                              --exclude-unreachable-branches
 			     --exclude-throw-branches
           )
     else()

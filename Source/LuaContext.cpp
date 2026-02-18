@@ -357,3 +357,75 @@ void LuaContext::registerHooks(LuaCpp::Engine::LuaState &L)
 		lua_sethook(L, std::get<2>(hook), mask, count);
 	}
 }
+
+// =====================
+// Pooling Methods Implementation
+// =====================
+
+PoolManager& LuaContext::getPoolManager() {
+	if (!poolManager_) {
+		poolManager_ = std::make_unique<PoolManager>();
+	}
+	return *poolManager_;
+}
+
+StatePool& LuaContext::getPool(const std::string& color) {
+	return getPoolManager().getPool(color);
+}
+
+bool LuaContext::hasPool(const std::string& color) {
+	if (!poolManager_) {
+		return color == "default" || color == "sandboxed" || color == "minimal" || color == "io";
+	}
+	return poolManager_->hasPool(color);
+}
+
+StatePool& LuaContext::createPool(const std::string& color, const PoolConfig& config) {
+	return getPoolManager().createPool(color, config);
+}
+
+void LuaContext::RunPooled(const std::string& name, const std::string& color) {
+	RunWithEnvironmentPooled(name, globalEnvironment, color);
+}
+
+void LuaContext::RunWithEnvironmentPooled(const std::string& name, const LuaEnvironment& env, const std::string& color) {
+	if (!registry.Exists(name)) {
+		throw std::runtime_error("Error: The code snippet not found: " + name);
+	}
+
+	auto state = AcquirePooledState(color);
+	
+	std::unique_ptr<LuaCodeSnippet> cs = registry.getByName(name);
+	cs->UploadCode(*state);
+
+	for (const auto& var : env) {
+		var.second->PushGlobal(*state, var.first);
+	}
+
+	int res = lua_pcall(*state, 0, LUA_MULTRET, 0);
+	if (res != LUA_OK) {
+		state->PrintStack(std::cout);
+		std::string err = lua_tostring(*state, 1);
+		ReleasePooledState(std::move(state), color);
+		throw std::runtime_error(err);
+	}
+
+	for (const auto& var : env) {
+		var.second->PopGlobal(*state);
+	}
+
+	ReleasePooledState(std::move(state), color);
+}
+
+std::unique_ptr<LuaState> LuaContext::AcquirePooledState(const std::string& color) {
+	return getPool(color).acquire();
+}
+
+void LuaContext::ReleasePooledState(std::unique_ptr<LuaState> state, const std::string& color) {
+	getPool(color).release(std::move(state));
+}
+
+PooledState LuaContext::AcquirePooledStateRAII(const std::string& color) {
+	StatePool& pool = getPool(color);
+	return PooledState(pool.acquire(), &pool);
+}

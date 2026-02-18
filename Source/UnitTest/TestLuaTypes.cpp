@@ -678,6 +678,18 @@ namespace LuaCpp {
 
 	}
 
+	TEST_F(TestLuaTypes, TestLuaTTableGetValueNonExistentKey) {
+		LuaContext ctx;
+		std::unique_ptr<LuaState> L = ctx.newState();
+
+		LuaTTable tbl;
+		tbl.setValue(Table::Key(1), std::make_shared<LuaTString>("exists"));
+		tbl.setValue(Table::Key("present"), std::make_shared<LuaTString>("here"));
+
+		EXPECT_EQ(LUA_TNIL, tbl.getValue(Table::Key(999)).getTypeId());
+		EXPECT_EQ(LUA_TNIL, tbl.getValue(Table::Key("nonexistent")).getTypeId());
+	}
+
 	TEST_F(TestLuaTypes, TestLuaTUserData) {
 		/**
 		 * Basic test getting instance of the `lua_State *`

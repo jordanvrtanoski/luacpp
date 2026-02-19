@@ -24,9 +24,11 @@
 
 #include "../LuaCpp.hpp"
 #include "gtest/gtest.h"
+#include "PoolTestUtils.hpp"
 
 using namespace LuaCpp;
 using namespace LuaCpp::Engine;
+using namespace LuaCpp::Test;
 
 class TestPoolManager : public ::testing::Test {
 protected:
@@ -35,15 +37,18 @@ protected:
 
 	void TearDown() override {
 	}
+
+	void VerifyPredefinedPools(PoolManager& manager) {
+		EXPECT_TRUE(manager.hasPool("default"));
+		EXPECT_TRUE(manager.hasPool("sandboxed"));
+		EXPECT_TRUE(manager.hasPool("minimal"));
+		EXPECT_TRUE(manager.hasPool("io"));
+	}
 };
 
 TEST_F(TestPoolManager, CreateManagerWithPredefinedPools) {
 	PoolManager manager;
-
-	EXPECT_TRUE(manager.hasPool("default"));
-	EXPECT_TRUE(manager.hasPool("sandboxed"));
-	EXPECT_TRUE(manager.hasPool("minimal"));
-	EXPECT_TRUE(manager.hasPool("io"));
+	VerifyPredefinedPools(manager);
 }
 
 TEST_F(TestPoolManager, GetPool) {
@@ -177,13 +182,7 @@ TEST_F(TestPoolManager, AcquireFromPredefinedPool) {
 	auto state = defaultPool.acquire();
 	EXPECT_NE(nullptr, state.get());
 	
-	lua_getglobal(*state, "io");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-	
-	lua_getglobal(*state, "math");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
+	ExpectDefaultLibraries(*state);
 	
 	defaultPool.release(std::move(state));
 
@@ -191,21 +190,7 @@ TEST_F(TestPoolManager, AcquireFromPredefinedPool) {
 	state = sandboxedPool.acquire();
 	EXPECT_NE(nullptr, state.get());
 	
-	lua_getglobal(*state, "math");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-	
-	lua_getglobal(*state, "string");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-	
-	lua_getglobal(*state, "io");
-	EXPECT_TRUE(lua_isnil(*state, -1));
-	lua_pop(*state, 1);
-	
-	lua_getglobal(*state, "os");
-	EXPECT_TRUE(lua_isnil(*state, -1));
-	lua_pop(*state, 1);
+	ExpectSandboxedLibraries(*state);
 	
 	sandboxedPool.release(std::move(state));
 
@@ -213,17 +198,7 @@ TEST_F(TestPoolManager, AcquireFromPredefinedPool) {
 	state = minimalPool.acquire();
 	EXPECT_NE(nullptr, state.get());
 	
-	lua_getglobal(*state, "print");
-	EXPECT_TRUE(lua_isfunction(*state, -1));
-	lua_pop(*state, 1);
-	
-	lua_getglobal(*state, "math");
-	EXPECT_TRUE(lua_isnil(*state, -1));
-	lua_pop(*state, 1);
-	
-	lua_getglobal(*state, "io");
-	EXPECT_TRUE(lua_isnil(*state, -1));
-	lua_pop(*state, 1);
+	ExpectBaseLibrariesOnly(*state);
 	
 	minimalPool.release(std::move(state));
 
@@ -231,17 +206,7 @@ TEST_F(TestPoolManager, AcquireFromPredefinedPool) {
 	state = ioPool.acquire();
 	EXPECT_NE(nullptr, state.get());
 	
-	lua_getglobal(*state, "io");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-	
-	lua_getglobal(*state, "os");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-	
-	lua_getglobal(*state, "math");
-	EXPECT_TRUE(lua_isnil(*state, -1));
-	lua_pop(*state, 1);
+	ExpectIOLibraries(*state);
 	
 	ioPool.release(std::move(state));
 }

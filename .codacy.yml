@@ -1,0 +1,26 @@
+---
+engines:
+  cppcheck:
+    enabled: true
+    config: |
+      <config>
+        <includePaths>
+          <includePath>/usr/include/c++/11/</includePath>
+          <includePath>/usr/include/x86_64-linux-gnu/c++/11/</includePath>
+          <includePath>/usr/include/</includePath>
+          <includePath>/usr/include/x86_64-linux-gnu/</includePath>
+        </includePaths>
+        <defines>
+          <define>__cplusplus=202100L</define>
+        </defines>
+        <checkLevel>exhaustive</checkLevel>
+        <checkHeaders>true</checkHeaders>
+      </config>
+    exclude_paths:
+      - ".devcontainer/**"
+      - "build/**"
+
+exclude_paths:
+  - ".devcontainer/**"
+  - "build/**"
+  - "**/googletest*/**"

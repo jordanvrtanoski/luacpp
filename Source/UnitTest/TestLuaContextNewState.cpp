@@ -3,30 +3,16 @@
 
 namespace LuaCpp {
 
-    // Global hook count
     int hook_count = 0;
 
-    // Custom allocator function for testing
     void* customAllocator(void *ud, void *p, size_t osize, size_t nsize) {
         (void)ud;
-        // Implement proper allocation logic here
+        (void)osize;
         if (nsize == 0) {
             free(p);
             return nullptr;
         }
-        if (p == nullptr) {
-            return malloc(nsize);
-        }
-        if (osize == nsize) {
-            return p;
-        }
-        // Resize the allocation
-        void *newp = malloc(nsize);
-        if (newp != nullptr) {
-            memcpy(newp, p, osize < nsize ? osize : nsize);
-            free(p);
-        }
-        return newp;
+        return realloc(p, nsize);
     }
 
     class TestLuaContextNewState : public ::testing::Test {

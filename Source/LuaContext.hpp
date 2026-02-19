@@ -504,7 +504,7 @@ namespace LuaCpp {
 		 * @returns
 		 * The shared pointer of the global variable
 		 */
-		std::shared_ptr<Engine::LuaType> &getGlobalVariable(const std::string &name);
+		std::shared_ptr<Engine::LuaType> getGlobalVariable(const std::string &name);
 
 		void addHook(lua_Hook hookFunc, const std::string &hookType, const int count = 0);
 

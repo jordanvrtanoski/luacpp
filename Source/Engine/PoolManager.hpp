@@ -44,6 +44,7 @@ namespace LuaCpp {
 			mutable std::mutex mutex_;
 
 			void initializePredefinedPools();
+			std::map<std::string, std::unique_ptr<StatePool>>::iterator findPoolOrThrow(const std::string& color);
 
 		public:
 			PoolManager();

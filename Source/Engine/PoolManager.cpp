@@ -55,17 +55,21 @@ void PoolManager::initializePredefinedPools() {
 	pools_["io"] = std::make_unique<StatePool>("io", ioConfig);
 }
 
+std::map<std::string, std::unique_ptr<StatePool>>::iterator PoolManager::findPoolOrThrow(const std::string& color) {
+	auto it = pools_.find(color);
+	if (it == pools_.end()) {
+		throw std::runtime_error("Pool '" + color + "' not found");
+	}
+	return it;
+}
+
 StatePool& PoolManager::getPool(const std::string& color) {
 	std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
 	if (threadSafe_) {
 		lock.lock();
 	}
 
-	auto it = pools_.find(color);
-	if (it == pools_.end()) {
-		throw std::runtime_error("Pool '" + color + "' not found");
-	}
-	return *(it->second);
+	return *(findPoolOrThrow(color)->second);
 }
 
 StatePool& PoolManager::createPool(const std::string& color, const PoolConfig& config) {
@@ -94,10 +98,7 @@ void PoolManager::destroyPool(const std::string& color) {
 		lock.lock();
 	}
 
-	auto it = pools_.find(color);
-	if (it == pools_.end()) {
-		throw std::runtime_error("Pool '" + color + "' not found");
-	}
+	auto it = findPoolOrThrow(color);
 
 	if (color == "default" || color == "sandboxed" || color == "minimal" || color == "io") {
 		throw std::runtime_error("Cannot destroy predefined pool '" + color + "'");

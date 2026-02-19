@@ -313,11 +313,10 @@ void LuaContext::AddGlobalVariable(const std::string &name, const std::shared_pt
 	globalEnvironment[name] = std::move(var);
 }
 
-std::shared_ptr<Engine::LuaType> &LuaContext::getGlobalVariable(const std::string &name) {
+std::shared_ptr<Engine::LuaType> LuaContext::getGlobalVariable(const std::string &name) {
     auto it = globalEnvironment.find(name);
     if (it == globalEnvironment.end()) {
-        static std::shared_ptr<Engine::LuaType> nullPtr = nullptr;
-        return nullPtr;
+        return nullptr;
     }
     return it->second;
 }

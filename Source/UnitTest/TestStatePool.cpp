@@ -24,9 +24,11 @@
 
 #include "../LuaCpp.hpp"
 #include "gtest/gtest.h"
+#include "PoolTestUtils.hpp"
 
 using namespace LuaCpp;
 using namespace LuaCpp::Engine;
+using namespace LuaCpp::Test;
 
 extern "C" {
 	static void testHook(lua_State *L, lua_Debug *ar) {
@@ -41,6 +43,30 @@ protected:
 	}
 
 	void TearDown() override {
+	}
+
+	void VerifyAcquireReleaseCounts(StatePool& pool, size_t expectedSize) {
+		EXPECT_EQ(expectedSize, pool.getCurrentSize());
+		EXPECT_EQ(0u, pool.availableCount());
+		EXPECT_EQ(expectedSize, pool.checkedOutCount());
+	}
+
+	void VerifyAvailableCounts(StatePool& pool, size_t expectedSize, size_t expectedAvailable) {
+		EXPECT_EQ(expectedSize, pool.getCurrentSize());
+		EXPECT_EQ(expectedAvailable, pool.availableCount());
+		EXPECT_EQ(0u, pool.checkedOutCount());
+	}
+
+	void AcquireVerifyReleaseThree(StatePool& pool) {
+		auto state1 = pool.acquire();
+		auto state2 = pool.acquire();
+		auto state3 = pool.acquire();
+
+		VerifyAcquireReleaseCounts(pool, 3u);
+
+		pool.release(std::move(state1));
+		pool.release(std::move(state2));
+		pool.release(std::move(state3));
 	}
 };
 
@@ -66,14 +92,10 @@ TEST_F(TestStatePool, AcquireAndReleaseState) {
 
 	auto state = pool.acquire();
 	EXPECT_NE(nullptr, state.get());
-	EXPECT_EQ(1u, pool.getCurrentSize());
-	EXPECT_EQ(0u, pool.availableCount());
-	EXPECT_EQ(1u, pool.checkedOutCount());
+	VerifyAcquireReleaseCounts(pool, 1u);
 
 	pool.release(std::move(state));
-	EXPECT_EQ(1u, pool.getCurrentSize());
-	EXPECT_EQ(1u, pool.availableCount());
-	EXPECT_EQ(0u, pool.checkedOutCount());
+	VerifyAvailableCounts(pool, 1u, 1u);
 }
 
 TEST_F(TestStatePool, AcquireMultipleStates) {
@@ -82,21 +104,9 @@ TEST_F(TestStatePool, AcquireMultipleStates) {
 
 	StatePool pool("test", config);
 
-	auto state1 = pool.acquire();
-	auto state2 = pool.acquire();
-	auto state3 = pool.acquire();
+	AcquireVerifyReleaseThree(pool);
 
-	EXPECT_EQ(3u, pool.getCurrentSize());
-	EXPECT_EQ(0u, pool.availableCount());
-	EXPECT_EQ(3u, pool.checkedOutCount());
-
-	pool.release(std::move(state1));
-	pool.release(std::move(state2));
-	pool.release(std::move(state3));
-
-	EXPECT_EQ(3u, pool.getCurrentSize());
-	EXPECT_EQ(3u, pool.availableCount());
-	EXPECT_EQ(0u, pool.checkedOutCount());
+	VerifyAvailableCounts(pool, 3u, 3u);
 }
 
 TEST_F(TestStatePool, ReuseAvailableState) {
@@ -139,19 +149,11 @@ TEST_F(TestStatePool, WarmupPool) {
 	StatePool pool("test", config);
 	pool.warmup(3);
 
-	EXPECT_EQ(3u, pool.getCurrentSize());
-	EXPECT_EQ(3u, pool.availableCount());
+	VerifyAvailableCounts(pool, 3u, 3u);
 
-	auto state1 = pool.acquire();
-	auto state2 = pool.acquire();
-	auto state3 = pool.acquire();
+	AcquireVerifyReleaseThree(pool);
 
-	EXPECT_EQ(3u, pool.getCurrentSize());
-	EXPECT_EQ(0u, pool.availableCount());
-
-	pool.release(std::move(state1));
-	pool.release(std::move(state2));
-	pool.release(std::move(state3));
+	VerifyAvailableCounts(pool, 3u, 3u);
 }
 
 TEST_F(TestStatePool, WarmupDoesNotExceedMaxSize) {
@@ -161,8 +163,7 @@ TEST_F(TestStatePool, WarmupDoesNotExceedMaxSize) {
 	StatePool pool("test", config);
 	pool.warmup(5);
 
-	EXPECT_EQ(2u, pool.getCurrentSize());
-	EXPECT_EQ(2u, pool.availableCount());
+	VerifyAvailableCounts(pool, 2u, 2u);
 }
 
 TEST_F(TestStatePool, DrainPool) {
@@ -172,13 +173,11 @@ TEST_F(TestStatePool, DrainPool) {
 	StatePool pool("test", config);
 	pool.warmup(3);
 
-	EXPECT_EQ(3u, pool.getCurrentSize());
-	EXPECT_EQ(3u, pool.availableCount());
+	VerifyAvailableCounts(pool, 3u, 3u);
 
 	pool.drain();
 
-	EXPECT_EQ(0u, pool.getCurrentSize());
-	EXPECT_EQ(0u, pool.availableCount());
+	VerifyAvailableCounts(pool, 0u, 0u);
 }
 
 TEST_F(TestStatePool, SetThreadSafe) {
@@ -228,25 +227,11 @@ TEST_F(TestStatePool, PoolConfigWithLibraries) {
 	auto state = pool.acquire();
 	EXPECT_NE(nullptr, state.get());
 
-	lua_getglobal(*state, "math");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "io");
-	EXPECT_TRUE(lua_isnil(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "os");
-	EXPECT_TRUE(lua_isnil(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "string");
-	EXPECT_TRUE(lua_isnil(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "print");
-	EXPECT_TRUE(lua_isfunction(*state, -1));
-	lua_pop(*state, 1);
+	ExpectGlobalIsTable(*state, "math");
+	ExpectGlobalIsNil(*state, "io");
+	ExpectGlobalIsNil(*state, "os");
+	ExpectGlobalIsNil(*state, "string");
+	ExpectGlobalIsFunction(*state, "print");
 
 	pool.release(std::move(state));
 }
@@ -260,10 +245,7 @@ TEST_F(TestStatePool, PoolConfigWithGlobalVariables) {
 
 	auto state = pool.acquire();
 	
-	lua_getglobal(*state, "test_var");
-	EXPECT_TRUE(lua_isnumber(*state, -1));
-	EXPECT_DOUBLE_EQ(42.0, lua_tonumber(*state, -1));
-	lua_pop(*state, 1);
+	ExpectGlobalIsNumber(*state, "test_var", 42.0);
 
 	pool.release(std::move(state));
 }
@@ -291,15 +273,12 @@ TEST_F(TestStatePool, ThreadSafeAcquireAndRelease) {
 	auto state1 = pool.acquire();
 	auto state2 = pool.acquire();
 
-	EXPECT_EQ(2u, pool.getCurrentSize());
-	EXPECT_EQ(2u, pool.checkedOutCount());
+	VerifyAcquireReleaseCounts(pool, 2u);
 
 	pool.release(std::move(state1));
 	pool.release(std::move(state2));
 
-	EXPECT_EQ(2u, pool.getCurrentSize());
-	EXPECT_EQ(2u, pool.availableCount());
-	EXPECT_EQ(0u, pool.checkedOutCount());
+	VerifyAvailableCounts(pool, 2u, 2u);
 }
 
 TEST_F(TestStatePool, GetConfig) {
@@ -321,17 +300,7 @@ TEST_F(TestStatePool, EmptyLibrariesLoadsAll) {
 
 	auto state = pool.acquire();
 	
-	lua_getglobal(*state, "io");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "math");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "os");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
+	ExpectAllStandardLibraries(*state);
 
 	pool.release(std::move(state));
 }
@@ -357,13 +326,8 @@ TEST_F(TestStatePool, PoolConfigWithLibrariesWithoutBase) {
 	auto state = pool.acquire();
 	EXPECT_NE(nullptr, state.get());
 
-	lua_getglobal(*state, "math");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "print");
-	EXPECT_TRUE(lua_isfunction(*state, -1));
-	lua_pop(*state, 1);
+	ExpectGlobalIsTable(*state, "math");
+	ExpectGlobalIsFunction(*state, "print");
 
 	pool.release(std::move(state));
 }
@@ -396,41 +360,7 @@ TEST_F(TestStatePool, AllStandardLibraries) {
 	auto state = pool.acquire();
 	EXPECT_NE(nullptr, state.get());
 
-	lua_getglobal(*state, "io");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "math");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "os");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "string");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "table");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "debug");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "coroutine");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "package");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
-
-	lua_getglobal(*state, "utf8");
-	EXPECT_TRUE(lua_istable(*state, -1));
-	lua_pop(*state, 1);
+	ExpectAllStandardLibraries(*state);
 
 	pool.release(std::move(state));
 }
@@ -446,8 +376,7 @@ TEST_F(TestStatePool, ThreadSafeWarmup) {
 	
 	pool.warmup(2);
 	
-	EXPECT_EQ(2u, pool.getCurrentSize());
-	EXPECT_EQ(2u, pool.availableCount());
+	VerifyAvailableCounts(pool, 2u, 2u);
 }
 
 TEST_F(TestStatePool, ThreadSafeStatsMethods) {
@@ -486,8 +415,7 @@ TEST_F(TestStatePool, ThreadSafeDrain) {
 	
 	pool.drain();
 	
-	EXPECT_EQ(0u, pool.getCurrentSize());
-	EXPECT_EQ(0u, pool.availableCount());
+	VerifyAvailableCounts(pool, 0u, 0u);
 }
 
 TEST_F(TestStatePool, AcquireFromAvailableQueueThreadSafe) {

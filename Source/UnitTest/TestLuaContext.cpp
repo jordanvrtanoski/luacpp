@@ -474,7 +474,7 @@ namespace LuaCpp {
 	
 		EXPECT_EQ("testing 1,2,3\n", output);
 		EXPECT_EQ("changed", str->getValue());
-		EXPECT_NE(nullptr, &ctx.getGlobalVariable("test_str"));
+		EXPECT_NE(nullptr, ctx.getGlobalVariable("test_str"));
 		std::shared_ptr<Engine::LuaTString> str2 = std::static_pointer_cast<Engine::LuaTString>(ctx.getGlobalVariable("test_str"));
 		EXPECT_EQ("changed", str2->getValue());
 
@@ -499,8 +499,7 @@ namespace LuaCpp {
 	
 		EXPECT_EQ("testing 1,2,3\n", output);
 		EXPECT_EQ("changed", str->getValue());
-		EXPECT_EQ(nullptr, &(*ctx.getGlobalVariable("test_str")));
+		EXPECT_EQ(nullptr, ctx.getGlobalVariable("test_str"));
 
 	}
-
 }

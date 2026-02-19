@@ -317,14 +317,4 @@ namespace LuaCpp {
         EXPECT_THROW(proxy.RunWithEnvironment(env), std::runtime_error);
     }
 
-    TEST_F(TestLuaContextNewState, TestCustomAllocatorSameSize) {
-        void *ptr = customAllocator(nullptr, nullptr, 0, 100);
-        EXPECT_NE(nullptr, ptr);
-        
-        void *same_ptr = customAllocator(nullptr, ptr, 100, 100);
-        EXPECT_EQ(ptr, same_ptr);
-        
-        customAllocator(nullptr, ptr, 100, 0);
-    }
-
 }

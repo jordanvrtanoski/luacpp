@@ -8,6 +8,7 @@ namespace LuaCpp {
 
     // Custom allocator function for testing
     void* customAllocator(void *ud, void *p, size_t osize, size_t nsize) {
+        (void)ud;
         // Implement proper allocation logic here
         if (nsize == 0) {
             free(p);
@@ -17,14 +18,12 @@ namespace LuaCpp {
             return malloc(nsize);
         }
         if (osize == nsize) {
-            return p; // No change in size, return the same pointer
+            return p;
         }
         // Resize the allocation
         void *newp = malloc(nsize);
         if (newp != nullptr) {
-            if (p != nullptr) {
-                memcpy(newp, p, osize < nsize ? osize : nsize);
-            }
+            memcpy(newp, p, osize < nsize ? osize : nsize);
             free(p);
         }
         return newp;
@@ -34,6 +33,19 @@ namespace LuaCpp {
       protected:
         virtual void SetUp() {}
     };
+
+    TEST_F(TestLuaContextNewState, TestCustomAllocatorSameSize) {
+        /**
+         * Test the custom allocator with same size reallocation
+         */
+        void *ptr = customAllocator(nullptr, nullptr, 0, 100);
+        EXPECT_NE(nullptr, ptr);
+        
+        void *same = customAllocator(nullptr, ptr, 100, 100);
+        EXPECT_EQ(ptr, same);
+        
+        customAllocator(nullptr, ptr, 100, 0);
+    }
 
     TEST_F(TestLuaContextNewState, TestNewState) {
         /**
@@ -303,16 +315,6 @@ namespace LuaCpp {
 
         // Run with environment - this should catch the error and throw an exception
         EXPECT_THROW(proxy.RunWithEnvironment(env), std::runtime_error);
-    }
-
-    TEST_F(TestLuaContextNewState, TestCustomAllocatorSameSize) {
-        void *ptr = customAllocator(nullptr, nullptr, 0, 100);
-        EXPECT_NE(nullptr, ptr);
-        
-        void *same_ptr = customAllocator(nullptr, ptr, 100, 100);
-        EXPECT_EQ(ptr, same_ptr);
-        
-        customAllocator(nullptr, ptr, 100, 0);
     }
 
 }
